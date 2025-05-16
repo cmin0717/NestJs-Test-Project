@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose'
 import { User } from 'src/user/user.schema'
 import { Model } from 'mongoose'
 import { JwtService } from '@nestjs/jwt'
+import { hashSHA256 } from 'src/common/util'
 
 @Injectable()
 export class AuthService {
@@ -15,9 +16,10 @@ export class AuthService {
   ) {}
 
   async login(body: LoginDto) {
+    const hashedPassword = await hashSHA256(body.password)
     const user = await this.userModel.findOne({
       email: body.email,
-      password: body.password,
+      password: hashedPassword,
     })
 
     if (!user) {

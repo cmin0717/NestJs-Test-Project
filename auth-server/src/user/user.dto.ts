@@ -1,4 +1,5 @@
-import { IsEmail, IsString } from 'class-validator'
+import { IsEmail, IsEnum, IsString } from 'class-validator'
+import { RoleEnum } from './user.schema'
 
 export class SignupDto {
   @IsEmail()
@@ -6,4 +7,15 @@ export class SignupDto {
 
   @IsString()
   password!: string
+}
+
+export class RoleDto {
+  @IsString()
+  userId!: string
+
+  @IsString()
+  targetUserId!: string
+
+  @IsEnum(RoleEnum)
+  role!: RoleEnum
 }

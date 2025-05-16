@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { GatewayController } from './gateway.controller'
 import { RoutingModule } from 'src/routing/routing.module'
-import { JwtStrategy } from 'src/guard/jwt.strategy'
+import { JwtStrategy } from 'src/common/jwt.strategy'
 
 @Module({
   imports: [RoutingModule],

@@ -1,8 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common'
-import { User } from './user.schema'
+import { BadRequestException, Injectable } from '@nestjs/common'
+import { RoleEnum, User } from './user.schema'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
-import { SignupDto } from './user.dto'
+import { RoleDto, SignupDto } from './user.dto'
+import { hashSHA256 } from 'src/common/util'
 
 @Injectable()
 export class UserService {
@@ -15,7 +16,7 @@ export class UserService {
     const user = await this.userModel.findById(userId).exec()
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials')
+      throw new BadRequestException('Invalid credentials')
     }
 
     return user.toJSON()
@@ -25,10 +26,36 @@ export class UserService {
     const user = await this.userModel.findOne({ email: signupDto.email }).exec()
 
     if (user) {
-      throw new UnauthorizedException('User already exists')
+      throw new BadRequestException('User already exists')
     }
 
-    const newUser = new this.userModel(signupDto)
-    return await newUser.save()
+    const newUserForm = new this.userModel({
+      ...signupDto,
+      password: await hashSHA256(signupDto.password),
+    })
+    const newUser = await newUserForm.save()
+
+    return newUser.toJSON()
+  }
+
+  async updateUserRole(roleDto: RoleDto) {
+    const user = await this.findOneByUserId(roleDto.userId)
+
+    if (user.role !== RoleEnum.ADMIN) {
+      throw new BadRequestException('User is not admin')
+    }
+
+    const targetUser = await this.userModel.findByIdAndUpdate(
+      roleDto.targetUserId,
+      {
+        role: roleDto.role,
+      },
+    )
+
+    if (!targetUser) {
+      throw new BadRequestException('Target user not found')
+    }
+
+    return targetUser.toJSON()
   }
 }

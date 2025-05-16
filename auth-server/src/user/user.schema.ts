@@ -4,6 +4,8 @@ import mongoose from 'mongoose'
 export enum RoleEnum {
   USER = 'user',
   ADMIN = 'admin',
+  OPERATOR = 'operator',
+  AUDITOR = 'auditor',
 }
 
 @Schema({
