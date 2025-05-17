@@ -38,6 +38,12 @@ export class User extends mongoose.Document {
   })
   role!: RoleEnum
 
+  @Prop({ required: true, type: Number, default: 0 })
+  cash!: number
+
+  @Prop({ required: true, type: [String], default: [] })
+  items!: string[]
+
   createdAt!: Date
 
   updatedAt!: Date
