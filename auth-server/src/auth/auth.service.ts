@@ -1,38 +1,26 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 
-import { LoginDto } from './auth.dto'
-import { InjectModel } from '@nestjs/mongoose'
-import { User } from 'src/user/user.schema'
-import { Model } from 'mongoose'
 import { JwtService } from '@nestjs/jwt'
-import { hashSHA256 } from 'src/common/util'
+
+import { LoginDto } from './dto/auth.dto'
+import { UserService } from 'src/user/user.service'
 
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly userService: UserService,
     private readonly jwtService: JwtService,
-    @InjectModel(User.name)
-    private userModel: Model<User>,
   ) {}
 
   async login(body: LoginDto) {
-    const hashedPassword = await hashSHA256(body.password)
-    const user = await this.userModel.findOne({
-      email: body.email,
-      password: hashedPassword,
-    })
+    const user = await this.userService.findOneByEmailAndPassword(
+      body.email,
+      body.password,
+    )
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials')
-    }
-
-    const payload = {
+    return await this.jwtService.signAsync({
       id: user.id,
       role: user.role,
-    }
-
-    const token = await this.jwtService.signAsync(payload)
-
-    return token
+    })
   }
 }

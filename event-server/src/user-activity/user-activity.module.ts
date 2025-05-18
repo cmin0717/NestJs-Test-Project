@@ -3,16 +3,16 @@ import { MongooseModule } from '@nestjs/mongoose'
 import {
   DailyMonsterKill,
   DailyMonsterKillSchema,
-} from './daily-monster-kill.schema'
+} from './schema/daily-monster-kill.schema'
 import {
   LoginInformation,
   LoginInformationSchema,
-} from './login-information.schema'
-import { PageVisit, PageVisitSchema } from './page-visit.schema'
+} from './schema/login-information.schema'
+import { PageVisit, PageVisitSchema } from './schema/page-visit.schema'
 import {
   PurchaseHistory,
   PurchaseHistorySchema,
-} from './purchase-history.schema'
+} from './schema/purchase-history.schema'
 import { UserActivityController } from './user-activity.controller'
 import { UserActivityService } from './user-activity.service'
 

@@ -1,11 +1,27 @@
 import { Module } from '@nestjs/common'
-import { GatewayController } from './gateway.controller'
-import { RoutingModule } from 'src/routing/routing.module'
+
 import { JwtStrategy } from 'src/common/jwt.strategy'
 
+import { HttpModule } from '@nestjs/axios'
+import { AuthServerHttpService } from './auth-server/auth-server-http.service'
+import { AuthServerAuthController } from './auth-server/controllers/auth.controller'
+import { AuthServerUserController } from './auth-server/controllers/user.controller'
+import { EventServerEventController } from './event-server/controllers/event.controller'
+import { EventServerRewardController } from './event-server/controllers/reward.controller'
+import { EventServerHttpService } from './event-server/event-server-http.service'
+
 @Module({
-  imports: [RoutingModule],
-  controllers: [GatewayController],
-  providers: [JwtStrategy],
+  imports: [
+    HttpModule.register({
+      timeout: 60000,
+    }),
+  ],
+  controllers: [
+    AuthServerAuthController,
+    AuthServerUserController,
+    EventServerEventController,
+    EventServerRewardController,
+  ],
+  providers: [JwtStrategy, AuthServerHttpService, EventServerHttpService],
 })
 export class GatewayModule {}

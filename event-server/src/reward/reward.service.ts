@@ -1,74 +1,95 @@
-import { InjectConnection, InjectModel } from '@nestjs/mongoose'
-import { Connection, Model } from 'mongoose'
-
-import { Reward, RewardType } from './reward.schema'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { Reward } from './schema/reward.schema'
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import { RewardDto, RewardUpdateDto } from './reward.dto'
-import { Promotion } from 'src/promotion/promotion.schema'
-import { PromotionDetail } from 'src/promotion/promotion-detail.schema'
-import { InjectQueue } from '@nestjs/bullmq'
-import { Queue } from 'bullmq'
 import {
-  RewardHistoryState,
-  RewardRequestHistory,
-} from './reward-history.schema'
-import { PromotionRequirementDto } from 'src/promotion/promotion.dto'
+  RewardDto,
+  RewardHistoryFilterDto,
+  RewardUpdateDto,
+} from './dto/reward.dto'
+import { RewardHistory } from './schema/reward-history.schema'
 import { UserActivityService } from 'src/user-activity/user-activity.service'
 import { CriticalSection } from 'src/distributed-lock/decorator/critical-section.decorator'
 import { LockParam } from 'src/distributed-lock/decorator/lockable-param.decorator'
+import { RewardType } from './enum/reward.enum'
+import { RewardHistoryState } from './enum/reward-history.enum'
+import { EventService } from 'src/event/event.service'
+import { RewardHistoryPagingResponse } from './interface/reward-history.interface'
+import { RewardHttpService } from './reward-http.service'
 
 @Injectable()
 export class RewardService {
   constructor(
-    @InjectConnection() private readonly connection: Connection,
     @InjectModel(Reward.name)
     private readonly rewardModel: Model<Reward>,
-    @InjectModel(RewardRequestHistory.name)
-    private readonly rewardHistoryModel: Model<RewardRequestHistory>,
-    @InjectModel(Promotion.name)
-    private readonly promotionModel: Model<Promotion>,
-    @InjectModel(PromotionDetail.name)
-    private readonly promotionDetailModel: Model<PromotionDetail>,
-    @InjectQueue('REQUEST_ITEM_REWARD_QUEUE')
-    private readonly itemRewardQueue: Queue,
-    @InjectQueue('REQUEST_CASH_REWARD_QUEUE')
-    private readonly cashRewardQueue: Queue,
+    @InjectModel(RewardHistory.name)
+    private readonly rewardHistoryModel: Model<RewardHistory>,
+    private readonly eventService: EventService,
     private readonly userActivityService: UserActivityService,
+    private readonly rewardHttpService: RewardHttpService,
   ) {}
 
-  async getRewards() {
-    const rewards = await this.rewardModel.find().exec()
-    return rewards.map((reward) => reward.toJSON())
+  async getRewards(): Promise<Reward[]> {
+    return await this.rewardModel.find().exec()
   }
 
-  async getReward(rewardId: string) {
+  async getReward(rewardId: string): Promise<Reward> {
     const reward = await this.rewardModel.findById(rewardId).exec()
 
     if (!reward) {
       throw new NotFoundException('Reward not found')
     }
 
-    return reward.toJSON()
+    return reward
   }
 
-  async getRewardHistories(userId: string) {
-    const rewardHistories = await this.rewardHistoryModel
-      .find({ userId })
+  async getRewardHistories(
+    filter: RewardHistoryFilterDto,
+    limit: number,
+  ): Promise<RewardHistoryPagingResponse> {
+    const queryFilter: any = {}
+
+    if (filter.userId) queryFilter.userId = filter.userId
+    if (filter.eventId) queryFilter.eventId = filter.eventId
+    if (filter.eventDetailId) queryFilter.eventDetailId = filter.eventDetailId
+    if (filter.state) queryFilter.state = filter.state
+    if (filter.rewardId) queryFilter['reward.rewardId'] = filter.rewardId
+    if (filter.cursorId) queryFilter._id = { $lt: filter.cursorId }
+
+    const items = await this.rewardHistoryModel
+      .find({ ...queryFilter })
+      .sort({ _id: -1 })
+      .limit(limit + 1)
       .exec()
-    return rewardHistories.map((rewardHistory) => rewardHistory.toJSON())
+
+    const hasNextPage = items.length > limit
+    const resultItems = hasNextPage ? items.slice(0, limit) : items
+    return {
+      items: resultItems,
+      hasNextPage,
+      cursor: hasNextPage
+        ? resultItems[resultItems.length - 1].createdAt
+        : null,
+    }
   }
 
-  async createReward(rewardDto: RewardDto) {
-    const reward = new this.rewardModel(rewardDto)
-    await reward.save()
-    return reward.toJSON()
+  async createReward(userId: string, rewardDto: RewardDto): Promise<Reward> {
+    const reward = new this.rewardModel({
+      ...rewardDto,
+      makerUserId: userId,
+    })
+
+    return await reward.save()
   }
 
-  async updateReward(rewardId: string, rewardUpdateDto: RewardUpdateDto) {
+  async updateReward(
+    rewardId: string,
+    rewardUpdateDto: RewardUpdateDto,
+  ): Promise<Reward> {
     const reward = await this.getReward(rewardId)
 
     const updatedReward = await this.rewardModel.findByIdAndUpdate(
@@ -77,218 +98,86 @@ export class RewardService {
       { new: true },
     )
 
-    return updatedReward.toJSON()
+    return updatedReward
   }
 
   @CriticalSection({ keyPrefix: 'REWARD_REQUEST' })
   async requestReward(
-    @LockParam() promotionDetailId: string,
     @LockParam() userId: string,
-  ) {
-    const promotionDetail =
-      await this.promotionDetailModel.findById(promotionDetailId)
-
-    if (!promotionDetail) {
-      throw new NotFoundException('Promotion detail not found')
-    }
-
-    const promotion = await this.promotionModel.findById(
-      promotionDetail.promotionId,
-    )
-
-    if (!promotion) {
-      throw new NotFoundException('Promotion not found')
-    }
-
-    if (!promotion.active || promotion.endDate < new Date()) {
-      throw new BadRequestException('Promotion is Done or Not Active')
-    }
-
-    const reward = await this.rewardModel.findById(
-      promotionDetail.reward.rewardId,
-    )
-
-    if (!reward) {
-      throw new NotFoundException('Reward not found')
-    }
-
-    if (reward.type === RewardType.CASH && !promotionDetail.reward.amount) {
-      throw new BadRequestException('Cash Reward amount is required')
-    }
-
-    if (reward.type === RewardType.ITEM && !promotionDetail.reward.count) {
-      throw new BadRequestException('Item Reward count is required')
-    }
-
-    await this.checkRewardEligibility(
+    @LockParam() eventDetailId: string,
+  ): Promise<RewardHistory> {
+    const rewardHistory = await this.rewardHistoryModel.findOne({
       userId,
-      promotion.startDate,
-      promotion.endDate,
-      promotionDetail.option,
+      eventDetailId,
+      state: RewardHistoryState.COMPLETED,
+    })
+
+    if (rewardHistory) {
+      throw new BadRequestException('Already requested reward')
+    }
+
+    const eventDetail = await this.eventService.getEventDetail(eventDetailId)
+
+    const event = await this.eventService.getActiveEvent(
+      eventDetail.eventId.toString(),
     )
 
-    const session = await this.connection.startSession()
+    const reward = await this.getReward(eventDetail.reward.rewardId)
+
+    await this.userActivityService.checkRewardEligibility(
+      userId,
+      event.startDate,
+      event.endDate,
+      eventDetail.eventRequirement,
+    )
+
+    const rewardHistoryForm = new this.rewardHistoryModel({
+      userId,
+      eventId: event.id,
+      eventDetailId,
+      rewardId: reward.id,
+      amount: eventDetail.reward.amount,
+    })
+
+    await this.eventService.increaseAvailableRewardCount(eventDetail.id, -1)
+
     try {
-      return await session.withTransaction(async () => {
-        await this.promotionDetailModel.findByIdAndUpdate(
-          promotionDetailId,
-          {
-            $inc: { rewardCount: -1 },
-          },
-          { session },
-        )
-
-        const [rewardHistory] = await this.rewardHistoryModel.create(
-          {
-            userId,
-            promotionId: promotion.id,
-            promotionDetailId,
-            reward: {
-              rewardId: reward.id,
-              title: reward.title,
-              type: reward.type,
-              count: promotionDetail.reward.count,
-              amount: promotionDetail.reward.amount,
-            },
-          },
-          { session },
-        )
-
-        const jobData = { userId, rewardHistory: rewardHistory.toJSON() }
-
-        if (reward.type === RewardType.ITEM) {
-          await this.itemRewardQueue.add(reward.type, jobData)
-        } else {
-          await this.cashRewardQueue.add(reward.type, jobData)
-        }
-
-        return rewardHistory.toJSON()
-      })
-    } finally {
-      await session.endSession()
+      await this.sendRewardToUser(userId, reward, eventDetail.reward.amount)
+      rewardHistoryForm.state = RewardHistoryState.COMPLETED
+      return await rewardHistoryForm.save()
+    } catch (error) {
+      await this.eventService.increaseAvailableRewardCount(eventDetail.id, 1)
+      rewardHistoryForm.state = RewardHistoryState.FAILED
+      await rewardHistoryForm.save()
+      throw error
     }
   }
 
-  async convertRewardHistoryState(
-    rewardHistoryId: string,
-    state: RewardHistoryState,
-  ) {
-    await this.rewardHistoryModel.findByIdAndUpdate(rewardHistoryId, {
-      $push: { states: state },
-      $set:
-        state === RewardHistoryState.COMPLETED
-          ? { isCompleted: true }
-          : undefined,
-    })
-  }
-
-  async increaseRewardHistoryCount(promotionDetailId: string, count: number) {
-    await this.promotionDetailModel.findByIdAndUpdate(promotionDetailId, {
-      $inc: { rewardCount: count },
-    })
-  }
-
-  private async checkRewardEligibility(
+  private async sendRewardToUser(
     userId: string,
-    promotionStartDate: Date,
-    promotionEndDate: Date,
-    promotionRequirementDto: PromotionRequirementDto,
+    reward: Reward,
+    amount: number,
   ) {
-    const {
-      specificAttendanceDates,
-      accumulatedAttendanceDays,
-      accumulatedPcRoomTime,
-      todayPcRoomTime,
-      accumulatedPurchaseAmount,
-      specificPageAccess,
-    } = promotionRequirementDto
-
-    if (specificAttendanceDates) {
-      const isEligible =
-        await this.userActivityService.checkSpecificAttendanceDates(
+    switch (reward.type) {
+      case RewardType.CASH:
+        await this.rewardHttpService.requestUserCash(userId, amount)
+        break
+      case RewardType.ITEM:
+        await this.rewardHttpService.requestUserItem(
           userId,
-          specificAttendanceDates,
+          reward.name,
+          amount,
         )
-
-      if (!isEligible) {
-        throw new BadRequestException(
-          'user is not eligible for specific attendance dates',
-        )
-      }
-    }
-
-    if (accumulatedAttendanceDays) {
-      const isEligible =
-        await this.userActivityService.checkAccumulatedAttendanceDays(
+        break
+      case RewardType.COUPON:
+        await this.rewardHttpService.requestUserCoupon(
           userId,
-          promotionStartDate,
-          promotionEndDate,
-          accumulatedAttendanceDays,
+          reward.name,
+          amount,
         )
-
-      if (!isEligible) {
-        throw new BadRequestException(
-          'user is not eligible for accumulated attendance days',
-        )
-      }
-    }
-
-    if (accumulatedPcRoomTime) {
-      const isEligible =
-        await this.userActivityService.checkAccumulatedPcRoomTime(
-          userId,
-          promotionStartDate,
-          promotionEndDate,
-          accumulatedPcRoomTime,
-        )
-
-      if (!isEligible) {
-        throw new BadRequestException(
-          'user is not eligible for accumulated pc room time',
-        )
-      }
-    }
-
-    if (todayPcRoomTime) {
-      const isEligible = await this.userActivityService.checkTodayPcRoomTime(
-        userId,
-        todayPcRoomTime,
-      )
-
-      if (!isEligible) {
-        throw new BadRequestException(
-          'user is not eligible for today pc room time',
-        )
-      }
-    }
-
-    if (accumulatedPurchaseAmount) {
-      const isEligible =
-        await this.userActivityService.checkAccumulatedPurchaseAmount(
-          userId,
-          promotionStartDate,
-          promotionEndDate,
-          accumulatedPurchaseAmount,
-        )
-
-      if (!isEligible) {
-        throw new BadRequestException(
-          'user is not eligible for accumulated purchase amount',
-        )
-      }
-    }
-
-    if (specificPageAccess) {
-      const isEligible = await this.userActivityService.checkSpecificPageAccess(
-        userId,
-        specificPageAccess,
-      )
-
-      if (!isEligible) {
-        throw new BadRequestException(
-          'user is not eligible for specific page access',
-        )
-      }
+        break
+      default:
+        throw new Error('Invalid reward type')
     }
   }
 }

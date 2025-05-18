@@ -24,6 +24,7 @@ async function bootstrap() {
       scheme: 'bearer',
     })
     .build()
+
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('swagger', app, document)
 

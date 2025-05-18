@@ -6,15 +6,16 @@ import {
   SetMetadata,
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
+import { RoleEnum } from 'src/gateway/auth-server/auth-server.enum'
 
-export const Roles = (...roles: string[]) => SetMetadata('ROLES_GUARD', roles)
+export const Roles = (...roles: RoleEnum[]) => SetMetadata('ROLES_GUARD', roles)
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {} // 가드에 Reflector를 주입
+  constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const roles = this.reflector.get<string[]>(
+    const roles = this.reflector.get<RoleEnum[]>(
       'ROLES_GUARD',
       context.getHandler(),
     )
@@ -26,7 +27,7 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest()
     const userRole: string = request.user.role
 
-    if (!roles.includes(userRole)) {
+    if (!roles.includes(userRole as RoleEnum)) {
       throw new ForbiddenException('User role is not authorized')
     }
 

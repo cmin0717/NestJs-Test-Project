@@ -1,9 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
-import { RoleEnum, User } from './user.schema'
+import { User } from './schema/user.schema'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
-import { CashDto, ItemDto, RoleDto, SignupDto } from './user.dto'
+import {
+  RoleDto,
+  SignupDto,
+  UserCouponDto,
+  UserItemDto,
+  UserCashDto,
+} from './dto/user.dto'
 import { hashSHA256 } from 'src/common/util'
+import { RoleEnum } from './enum/user.enum'
 
 @Injectable()
 export class UserService {
@@ -12,76 +19,107 @@ export class UserService {
     private userModel: Model<User>,
   ) {}
 
-  async findOneByUserId(userId: string) {
+  async findOneByUserId(userId: string): Promise<User> {
     const user = await this.userModel.findById(userId).exec()
 
     if (!user) {
       throw new BadRequestException('Invalid credentials')
     }
 
-    return user.toJSON()
+    return user
   }
 
-  async signup(signupDto: SignupDto) {
+  async findOneByEmailAndPassword(
+    email: string,
+    password: string,
+  ): Promise<User> {
+    const hashedPassword = await hashSHA256(password)
+    const user = await this.userModel.findOne({ email, hashedPassword }).exec()
+
+    if (!user) {
+      throw new BadRequestException('Invalid credentials')
+    }
+
+    return user
+  }
+
+  async signup(signupDto: SignupDto): Promise<User> {
     const user = await this.userModel.findOne({ email: signupDto.email }).exec()
 
     if (user) {
       throw new BadRequestException('User already exists')
     }
 
+    const hashedPassword = await hashSHA256(signupDto.password)
     const newUserForm = new this.userModel({
-      ...signupDto,
-      password: await hashSHA256(signupDto.password),
+      email: signupDto.email,
+      hashedPassword,
     })
-    const newUser = await newUserForm.save()
 
-    return newUser.toJSON()
+    return await newUserForm.save()
   }
 
-  async updateUserRole(roleDto: RoleDto) {
-    const user = await this.findOneByUserId(roleDto.userId)
+  async updateUserRole(userId: string, roleDto: RoleDto): Promise<User> {
+    const user = await this.findOneByUserId(userId)
 
     if (user.role !== RoleEnum.ADMIN) {
       throw new BadRequestException('User is not admin')
     }
 
-    const targetUser = await this.userModel.findByIdAndUpdate(
-      roleDto.targetUserId,
-      {
-        role: roleDto.role,
-      },
-    )
+    const { targetUserId, role } = roleDto
+    const targetUser = await this.userModel.findByIdAndUpdate(targetUserId, {
+      $set: { role },
+    })
 
     if (!targetUser) {
       throw new BadRequestException('Target user not found')
     }
 
-    return targetUser.toJSON()
+    return targetUser
   }
 
-  async updateUserCash(cashDto: CashDto) {
-    const user = await this.findOneByUserId(cashDto.userId)
-
-    await this.userModel.updateOne(
+  async updateUserCash(userId: string, cashDto: UserCashDto): Promise<void> {
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
       {
-        id: user.id,
+        $inc: { cash: cashDto.amount },
       },
-      {
-        $inc: { cash: cashDto.cash },
-      },
+      { new: true },
     )
+
+    if (!updatedUser) {
+      throw new BadRequestException('User not found')
+    }
   }
 
-  async updateUserItem(itemDto: ItemDto) {
-    const user = await this.findOneByUserId(itemDto.userId)
-
-    await this.userModel.updateOne(
+  async updateUserItem(userId: string, itemDto: UserItemDto): Promise<void> {
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
       {
-        id: user.id,
+        $push: { items: itemDto },
       },
-      {
-        $push: { items: itemDto.item },
-      },
+      { new: true },
     )
+
+    if (!updatedUser) {
+      throw new BadRequestException('User not found')
+    }
+  }
+
+  async updateUserCoupon(
+    userId: string,
+    couponDto: UserCouponDto,
+  ): Promise<void> {
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      {
+        $push: { coupons: couponDto },
+      },
+      { new: true },
+    )
+
+    if (!updatedUser) {
+      throw new BadRequestException('User not found')
+    }
   }
 }

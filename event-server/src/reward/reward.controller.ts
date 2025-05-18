@@ -1,45 +1,78 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common'
 import { RewardService } from './reward.service'
-import { RewardDto, RewardRequestDto, RewardUpdateDto } from './reward.dto'
+import {
+  RewardDto,
+  RewardHistoryFilterDto,
+  RewardUpdateDto,
+} from './dto/reward.dto'
+import { RequestUser, RequestUserData } from 'src/common/user.decorator'
+import { IsObjectIdPipe } from '@nestjs/mongoose'
 
 @Controller({ path: 'reward' })
 export class RewardController {
   constructor(private readonly rewardService: RewardService) {}
 
-  @Get('')
+  @Get('/')
   async getRewards() {
     return this.rewardService.getRewards()
   }
 
-  @Get(':rewardId')
-  async getReward(@Param('rewardId') rewardId: string) {
-    return this.rewardService.getReward(rewardId)
+  @Get('/histories')
+  async getRewardHistories(
+    @RequestUser() user: RequestUserData,
+    @Query() rewardHistoryFilterDto: RewardHistoryFilterDto,
+    @Query('limit', new DefaultValuePipe(10)) limit: number,
+  ) {
+    return this.rewardService.getRewardHistories(
+      {
+        ...rewardHistoryFilterDto,
+        userId: user.id,
+      },
+      limit,
+    )
   }
 
-  @Get('histories/:userId')
-  async getRewardHistories(@Param('userId') userId: string) {
-    return this.rewardService.getRewardHistories(userId)
+  @Get('histories/admin')
+  async getRewardHistoriesAdmin(
+    @Query() rewardHistoryFilterDto: RewardHistoryFilterDto,
+    @Query('limit', new DefaultValuePipe(10)) limit: number,
+  ) {
+    return this.rewardService.getRewardHistories(
+      {
+        ...rewardHistoryFilterDto,
+      },
+      limit,
+    )
   }
 
   @Post('')
-  async createReward(@Body() rewardDto: RewardDto) {
-    return this.rewardService.createReward(rewardDto)
+  async createReward(
+    @RequestUser() user: RequestUserData,
+    @Body() rewardDto: RewardDto,
+  ) {
+    return this.rewardService.createReward(user.id, rewardDto)
   }
 
-  @Post('request/:promotionDetailId')
+  @Post('request/:eventDetailId')
   async requestReward(
-    @Param('promotionDetailId') promotionDetailId: string,
-    @Body() rewardRequestDto: RewardRequestDto,
+    @RequestUser() user: RequestUserData,
+    @Param('eventDetailId') eventDetailId: string,
   ) {
-    return this.rewardService.requestReward(
-      promotionDetailId,
-      rewardRequestDto.userId,
-    )
+    return this.rewardService.requestReward(user.id, eventDetailId)
   }
 
   @Patch(':rewardId')
   async updateReward(
-    @Param('rewardId') rewardId: string,
+    @Param('rewardId', IsObjectIdPipe) rewardId: string,
     @Body() rewardUpdateDto: RewardUpdateDto,
   ) {
     return this.rewardService.updateReward(rewardId, rewardUpdateDto)

@@ -70,10 +70,10 @@ export class CriticalSectionDecoratorRegister implements OnModuleInit {
                 if (typeof parameter === 'string') {
                   lockParam = lockParam + parameter + ':'
                 } else if (typeof parameter.getLockKey === 'function') {
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                   lockParam = lockParam + parameter.getLockKey() + ':'
                 }
               })
+              console.log(lockParam)
 
               let result
               const lockIdentity =
@@ -82,7 +82,6 @@ export class CriticalSectionDecoratorRegister implements OnModuleInit {
                   expirationMillis,
                 )
               try {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 result = await methodRef.call(instance, ...args)
               } finally {
                 if (autoRelease) {

@@ -1,8 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 
-import { v4 as uuid } from 'uuid'
-
 import { RedisClientService } from '../redis-client/redis-client.service'
+import { randomUUID } from 'crypto'
 
 @Injectable()
 export class DistributedLockService {
@@ -12,7 +11,7 @@ export class DistributedLockService {
     key: string,
     expirationMillis: number = 1 * 60 * 60 * 1000,
   ) {
-    const lockIdentity = uuid()
+    const lockIdentity = randomUUID()
 
     const result = await this.redisClient.set(key, lockIdentity, {
       NX: true,
