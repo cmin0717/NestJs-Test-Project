@@ -10,7 +10,7 @@ import { UserCouponDto, UserItemDto } from '../dto/user.dto'
 export class User extends mongoose.Document {
   id!: string
 
-  @Prop({ required: true, unique: true, index: true })
+  @Prop({ required: true, unique: true })
   email!: string
 
   @Prop({ required: true })
@@ -39,4 +39,4 @@ export class User extends mongoose.Document {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)
-UserSchema.index({ email: 1 }, { unique: true })
+UserSchema.index({ email: 1, hashedPassword: 1 })

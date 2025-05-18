@@ -6,8 +6,7 @@ import { Request } from 'express'
 export class EventServerHttpService {
   private readonly baseUrl!: string
   constructor(private readonly httpService: HttpService) {
-    // config로 변경
-    this.baseUrl = 'http://localhost:3002'
+    this.baseUrl = process.env.EVENT_SERVER_URL || 'http://localhost:3002'
   }
 
   async forward(req: Request) {

@@ -15,7 +15,7 @@ export class RedisClientService implements OnModuleInit, OnApplicationShutdown {
 
   async onModuleInit() {
     this.redisClient = createClient({
-      url: 'redis://localhost:6379',
+      url: process.env.REDIS_URI || 'redis://localhost:6379',
     })
 
     await this.redisClient.connect()

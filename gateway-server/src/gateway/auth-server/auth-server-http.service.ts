@@ -6,8 +6,7 @@ import { Request } from 'express'
 export class AuthServerHttpService {
   private baseUrl!: string
   constructor(private readonly httpService: HttpService) {
-    // config로 변경
-    this.baseUrl = 'http://localhost:3001'
+    this.baseUrl = process.env.AUTH_SERVER_URL || 'http://localhost:3001'
   }
 
   async forward(req: Request) {

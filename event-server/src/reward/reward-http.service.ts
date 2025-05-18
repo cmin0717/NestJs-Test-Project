@@ -6,8 +6,8 @@ export class RewardHttpService {
   private readonly AUTH_SERVER_URL!: string
 
   constructor(private readonly httpService: HttpService) {
-    // config로 변경
-    this.AUTH_SERVER_URL = 'http://localhost:3001'
+    this.AUTH_SERVER_URL =
+      process.env.AUTH_SERVER_URL || 'http://localhost:3001'
   }
 
   private async patch(url: string, data: any) {

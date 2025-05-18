@@ -6,7 +6,11 @@ import { EventRequirementDto, EventRewardDto } from '../dto/event.dto'
 export class EventDetail {
   id!: string
 
-  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId })
+  @Prop({
+    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    index: true,
+  })
   eventId!: mongoose.Schema.Types.ObjectId
 
   @Prop({ required: true, type: EventRewardDto })

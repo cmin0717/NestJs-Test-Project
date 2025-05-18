@@ -5,7 +5,13 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger'
 @Controller({ path: 'test' })
 @ApiTags('테스트 관련 API')
 export class TestController {
-  constructor(private readonly httpService: HttpService) {}
+  private readonly authServerUrl: string
+  private readonly eventServerUrl: string
+  constructor(private readonly httpService: HttpService) {
+    this.authServerUrl = process.env.AUTH_SERVER_URL || 'http://localhost:3001'
+    this.eventServerUrl =
+      process.env.EVENT_SERVER_URL || 'http://localhost:3002'
+  }
 
   @Get('ping')
   @ApiOperation({ summary: '서버 상태 체크' })
@@ -13,7 +19,7 @@ export class TestController {
     const authServer = await (async () => {
       try {
         const response = await this.httpService.axiosRef.get(
-          'http://localhost:3001/ping',
+          this.authServerUrl + '/ping',
         )
         return response.data
       } catch (err: any) {
@@ -24,7 +30,7 @@ export class TestController {
     const eventServer = await (async () => {
       try {
         const response = await this.httpService.axiosRef.get(
-          'http://localhost:3002/ping',
+          this.eventServerUrl + '/ping',
         )
         return response.data
       } catch (err: any) {

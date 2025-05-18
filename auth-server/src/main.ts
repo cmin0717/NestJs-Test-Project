@@ -12,11 +12,6 @@ async function bootstrap() {
     }),
   )
 
-  app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3002'],
-    credentials: true,
-  })
-
-  await app.listen(3001)
+  await app.listen(process.env.PORT || 3001)
 }
 bootstrap()

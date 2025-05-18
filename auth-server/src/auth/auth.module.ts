@@ -8,9 +8,8 @@ import { UserModule } from 'src/user/user.module'
   imports: [
     JwtModule.registerAsync({
       useFactory: async () => {
-        // config 파일에서 가져오도록 수정
         return {
-          secret: 'maple_story_jwt_secret',
+          secret: process.env.JWT_SECRET || 'maple_story_jwt_secret',
           signOptions: { expiresIn: '1d' },
         }
       },

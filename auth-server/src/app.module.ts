@@ -6,7 +6,9 @@ import { AppController } from './app.controller'
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/auth-server'),
+    MongooseModule.forRoot(
+      process.env.MONGODB_URI || 'mongodb://localhost:27017/auth-server',
+    ),
     UserModule,
     AuthModule,
   ],

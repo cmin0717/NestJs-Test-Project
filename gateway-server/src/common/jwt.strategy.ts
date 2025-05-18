@@ -19,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         JwtStrategy.fromAuthCookieAsToken,
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
-      secretOrKey: 'maple_story_jwt_secret',
+      secretOrKey: process.env.JWT_SECRET || 'maple_story_jwt_secret',
     })
   }
 
