@@ -16,10 +16,16 @@ import {
   UserItemDto,
 } from './dto/user.dto'
 import { ObjectIdPipe } from 'src/common/object-id-validator'
+import { RequestUser, RequestUserData } from 'src/common/user.decorator'
 
 @Controller({ path: 'user' })
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get('')
+  async getUser(@RequestUser() user: RequestUserData) {
+    return this.userService.findOneByUserId(user.id)
+  }
 
   @Get('/findOneByUserId')
   async findOneByUserId(@Query('userId', ObjectIdPipe) userId: string) {

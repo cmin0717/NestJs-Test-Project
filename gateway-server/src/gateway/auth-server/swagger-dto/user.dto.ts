@@ -24,7 +24,8 @@ export class UpdateUserRoleDto {
 
   @ApiProperty({
     description: '대상 유저를 변경할 Role 값',
-    enum: ['USER', 'ADMIN', 'OPERATOR', 'AUDITOR'],
+    enum: RoleEnum,
+    example: RoleEnum.USER,
   })
   role!: RoleEnum
 }

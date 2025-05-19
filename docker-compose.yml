@@ -2,7 +2,6 @@ services:
   gateway-server:
     build: 
       context: ./gateway-server
-      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
@@ -14,18 +13,10 @@ services:
     depends_on:
       - auth-server
       - event-server
-    networks:
-      - app-network
-    volumes:
-      - ./gateway-server:/app
-      - /app/node_modules
 
   auth-server:
     build:
       context: ./auth-server
-      dockerfile: Dockerfile
-    ports:
-      - "3001:3000"
     environment:
       - PORT=3000
       - TZ=Asia/Seoul
@@ -33,18 +24,10 @@ services:
       - MONGODB_URI=mongodb://mongodb:27017/auth-server
     depends_on:
       - mongodb
-    networks:
-      - app-network
-    volumes:
-      - ./auth-server:/app
-      - /app/node_modules
 
   event-server:
     build:
       context: ./event-server
-      dockerfile: Dockerfile
-    ports:
-      - "3002:3000"
     environment:
       - PORT=3000
       - TZ=Asia/Seoul
@@ -54,34 +37,17 @@ services:
     depends_on:
       - mongodb
       - redis
-    networks:
-      - app-network
-    volumes:
-      - ./event-server:/app
-      - /app/node_modules
 
   mongodb:
     image: mongo:latest
-    ports:
-      - "27017:27017"
     volumes:
       - mongodb_data:/data/db
-    networks:
-      - app-network
-      
+
   redis:
     image: redis:alpine
-    ports:
-      - "6379:6379"
+    command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
-    networks:
-      - app-network
-    command: redis-server --appendonly yes
-
-networks:
-  app-network:
-    driver: bridge
 
 volumes:
   mongodb_data:

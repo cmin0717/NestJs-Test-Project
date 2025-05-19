@@ -1,5 +1,5 @@
-import { Controller, Patch, Post, Req, UseGuards } from '@nestjs/common'
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { Controller, Get, Patch, Post, Req, UseGuards } from '@nestjs/common'
+import { ApiBody, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger'
 
 import { JwtAuthGuard } from 'src/common/jwt.guard'
 import { Roles, RolesGuard } from 'src/common/role.guard'
@@ -12,6 +12,14 @@ import { RoleEnum } from '../auth-server.enum'
 @ApiTags('인증 서버 - User')
 export class AuthServerUserController {
   constructor(private readonly authServerHttpService: AuthServerHttpService) {}
+
+  @Get('')
+  @ApiOperation({ summary: '유저 정보 조회[모두 이용 가능]' })
+  @UseGuards(JwtAuthGuard)
+  @ApiSecurity('jwt')
+  async getUser(@Req() req: Request) {
+    return await this.authServerHttpService.forward(req)
+  }
 
   @Post('/signup')
   @ApiOperation({ summary: '회원가입[모두 이용 가능]' })

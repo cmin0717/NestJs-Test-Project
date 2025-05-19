@@ -25,11 +25,11 @@ export class EventDto {
   @IsString()
   description!: string
 
-  @Transform(transformDate)
+  @Transform(({ value }) => transformDate(value))
   @IsDate()
   startDate!: Date
 
-  @Transform(transformDate)
+  @Transform(({ value }) => transformDate(value))
   @IsDate()
   endDate!: Date
 }
@@ -119,10 +119,12 @@ export class EventUpdateDto {
   @IsOptional()
   description?: string
 
+  @Transform(({ value }) => transformDate(value))
   @IsDate()
   @IsOptional()
   startDate?: Date
 
+  @Transform(({ value }) => transformDate(value))
   @IsDate()
   @IsOptional()
   endDate?: Date

@@ -1,6 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { RewardHistoryState, RewardType } from '../event-server.enum'
 
+export class RewardFilterDto {
+  @ApiProperty({
+    description: '보상 타입 (CASH, ITEM, COUPON)',
+    required: false,
+    type: String,
+    enum: RewardType,
+  })
+  type?: RewardType
+}
+
 export class RewardDto {
   @ApiProperty({
     description: '보상 제목',
@@ -42,6 +52,7 @@ export class RewardUpdateDto {
     description: '보상 타입 (CASH, ITEM, COUPON)',
     required: false,
     type: String,
+    enum: RewardType,
     example: 'CASH',
   })
   type?: RewardType
@@ -84,14 +95,14 @@ export class RewardHistoryFilterDto {
   state?: RewardHistoryState
 
   @ApiProperty({
-    description: '한번에 가져올 개수',
+    description: '한번에 가져올 개수[기본값: 10]',
     required: false,
     type: String,
   })
   limit?: string
 
   @ApiProperty({
-    description: '커서(id 기준)',
+    description: '커서(id 기준)[기본값: null]',
     required: false,
     type: String,
   })

@@ -16,14 +16,15 @@ import {
 } from './dto/reward.dto'
 import { RequestUser, RequestUserData } from 'src/common/user.decorator'
 import { ObjectIdPipe } from 'src/common/object-id-validator'
+import { RewardType } from './enum/reward.enum'
 
 @Controller({ path: 'reward' })
 export class RewardController {
   constructor(private readonly rewardService: RewardService) {}
 
   @Get('/')
-  async getRewards() {
-    return this.rewardService.getRewards()
+  async getRewards(@Query('type') type?: RewardType) {
+    return this.rewardService.getRewards(type)
   }
 
   @Get('/histories')

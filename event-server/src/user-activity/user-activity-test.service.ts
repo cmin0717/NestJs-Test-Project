@@ -110,21 +110,34 @@ export class UserActivityTestService {
   }
 
   async updateDailyMonsterKill(id: string, dto: UpdateDailyMonsterKillDto) {
-    return this.dailyMonsterKillModel.findByIdAndUpdate(
+    const dailyMonsterKill = await this.dailyMonsterKillModel.findByIdAndUpdate(
       id,
       { $set: { monsterKillCount: dto.monsterKillCount } },
       { new: true },
     )
+
+    if (!dailyMonsterKill) {
+      throw new NotFoundException('Daily monster kill not found')
+    }
+
+    return dailyMonsterKill
   }
 
   async updateAccessGameInformation(
     id: string,
     dto: UpdateAccessGameInformationDto,
   ) {
-    return this.accessGameInformationModel.findByIdAndUpdate(
-      id,
-      { $set: { ...dto } },
-      { new: true },
-    )
+    const accessGameInformation =
+      await this.accessGameInformationModel.findByIdAndUpdate(
+        id,
+        { $set: { ...dto } },
+        { new: true },
+      )
+
+    if (!accessGameInformation) {
+      throw new NotFoundException('Access game information not found')
+    }
+
+    return accessGameInformation
   }
 }

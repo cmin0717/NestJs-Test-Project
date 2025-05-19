@@ -14,6 +14,7 @@ import { Roles, RolesGuard } from 'src/common/role.guard'
 import { RoleEnum } from 'src/gateway/auth-server/auth-server.enum'
 import {
   RewardDto,
+  RewardFilterDto,
   RewardHistoryFilterDto,
   RewardUpdateDto,
 } from '../swagger-dto/reward.dto'
@@ -27,6 +28,7 @@ export class EventServerRewardController {
 
   @Get('/')
   @ApiOperation({ summary: '보상 리스트 조회[ADMIN, OPERATOR, AUDITOR 전용]' })
+  @ApiQuery({ type: RewardFilterDto })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN, RoleEnum.OPERATOR, RoleEnum.AUDITOR)
   @ApiSecurity('jwt')

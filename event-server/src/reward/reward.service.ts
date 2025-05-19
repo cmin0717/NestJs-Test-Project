@@ -34,8 +34,14 @@ export class RewardService {
     private readonly rewardHttpService: RewardHttpService,
   ) {}
 
-  async getRewards(): Promise<Reward[]> {
-    return await this.rewardModel.find().exec()
+  async getRewards(type?: RewardType): Promise<Reward[]> {
+    const queryFilter: any = {}
+    if (type) queryFilter.type = type
+
+    return await this.rewardModel
+      .find(queryFilter)
+      .sort({ createdAt: -1 })
+      .exec()
   }
 
   async getReward(rewardId: string): Promise<Reward> {
@@ -58,7 +64,7 @@ export class RewardService {
     if (filter.eventId) queryFilter.eventId = filter.eventId
     if (filter.eventDetailId) queryFilter.eventDetailId = filter.eventDetailId
     if (filter.state) queryFilter.state = filter.state
-    if (filter.rewardId) queryFilter['reward.rewardId'] = filter.rewardId
+    if (filter.rewardId) queryFilter.rewardId = filter.rewardId
     if (filter.cursorId) queryFilter._id = { $lt: filter.cursorId }
 
     const items = await this.rewardHistoryModel
