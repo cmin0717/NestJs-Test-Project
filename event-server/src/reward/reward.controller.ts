@@ -15,7 +15,7 @@ import {
   RewardUpdateDto,
 } from './dto/reward.dto'
 import { RequestUser, RequestUserData } from 'src/common/user.decorator'
-import { IsObjectIdPipe } from '@nestjs/mongoose'
+import { ObjectIdPipe } from 'src/common/object-id-validator'
 
 @Controller({ path: 'reward' })
 export class RewardController {
@@ -65,14 +65,14 @@ export class RewardController {
   @Post('request/:eventDetailId')
   async requestReward(
     @RequestUser() user: RequestUserData,
-    @Param('eventDetailId') eventDetailId: string,
+    @Param('eventDetailId', ObjectIdPipe) eventDetailId: string,
   ) {
     return this.rewardService.requestReward(user.id, eventDetailId)
   }
 
   @Patch(':rewardId')
   async updateReward(
-    @Param('rewardId', IsObjectIdPipe) rewardId: string,
+    @Param('rewardId', ObjectIdPipe) rewardId: string,
     @Body() rewardUpdateDto: RewardUpdateDto,
   ) {
     return this.rewardService.updateReward(rewardId, rewardUpdateDto)

@@ -72,9 +72,7 @@ export class RewardService {
     return {
       items: resultItems,
       hasNextPage,
-      cursor: hasNextPage
-        ? resultItems[resultItems.length - 1].createdAt
-        : null,
+      cursorId: hasNextPage ? resultItems[resultItems.length - 1].id : null,
     }
   }
 
@@ -91,13 +89,15 @@ export class RewardService {
     rewardId: string,
     rewardUpdateDto: RewardUpdateDto,
   ): Promise<Reward> {
-    const reward = await this.getReward(rewardId)
-
     const updatedReward = await this.rewardModel.findByIdAndUpdate(
-      reward.id,
+      rewardId,
       { $set: { ...rewardUpdateDto } },
       { new: true },
     )
+
+    if (!updatedReward) {
+      throw new NotFoundException('Reward not found')
+    }
 
     return updatedReward
   }
@@ -109,7 +109,7 @@ export class RewardService {
   ): Promise<RewardHistory> {
     // auth-server 에서 이벤트 참여 여부 확인
     const userRequestSuccessHistory =
-      await this.rewardHttpService.getUserRequestSuccessHistory(
+      await this.rewardHttpService.requestGetUserSuccessHistory(
         userId,
         eventDetailId,
       )
@@ -161,14 +161,14 @@ export class RewardService {
       rewardHistoryForm.state = RewardHistoryState.COMPLETED
       return await rewardHistoryForm.save()
     } catch (error) {
-      // 네트워크 문제 등으로 보상 지급 성공인데 실패 처리되는 경우 처리
+      // 실패시 혹시 이미 보상 지급 성공 히스토리가 있는지 확인
       const userRequestSuccessHistory =
-        await this.rewardHttpService.getUserRequestSuccessHistory(
+        await this.rewardHttpService.requestGetUserSuccessHistory(
           userId,
           eventDetail.id,
         )
 
-      // 이미 보상 지급 성공 히스토리가 있으면 COMPLETED로 생성
+      // 보상 지급 성공 히스토리가 있으면 COMPLETED로 생성 후 리턴
       if (userRequestSuccessHistory) {
         rewardHistoryForm.state = RewardHistoryState.COMPLETED
         return await rewardHistoryForm.save()
@@ -192,7 +192,7 @@ export class RewardService {
       await this.eventService.increaseAvailableRewardCount(eventDetailId, -1)
     } catch (error) {
       if (
-        error instanceof NotFoundException &&
+        error instanceof BadRequestException &&
         error.message === 'Event available reward count is not enough'
       ) {
         await this.eventService.updateEvent(eventId, { active: false })

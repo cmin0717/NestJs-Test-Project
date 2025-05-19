@@ -64,7 +64,6 @@ export class EventService {
 
   async getEvents(): Promise<Event[]> {
     const events = await this.eventModel.find().sort({ createdAt: -1 }).exec()
-
     return events
   }
 

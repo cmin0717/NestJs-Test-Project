@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios'
 import { HttpException, Injectable } from '@nestjs/common'
-
+import { AxiosRequestConfig } from 'axios'
 @Injectable()
 export class RewardHttpService {
   private readonly AUTH_SERVER_URL!: string
@@ -10,27 +10,43 @@ export class RewardHttpService {
       process.env.AUTH_SERVER_URL || 'http://localhost:3001'
   }
 
-  private async patch(url: string, data: any) {
-    try {
-      const response = await this.httpService.axiosRef.patch(url, data)
-      return response.data
-    } catch (error) {
-      if (error.isAxiosError) {
-        const axiosError = error
-
-        if (axiosError.response) {
-          const { status, data } = axiosError.response
-
-          throw new HttpException(data, status)
-        }
-
-        if (axiosError.request) {
-          throw new HttpException('외부 서버에서 응답이 없습니다', 504)
-        }
-      }
-
+  private axiosErrorHandler(error: any): never {
+    if (!error.isAxiosError) {
       console.error('예상치 못한 에러:', error)
       throw error
+    }
+
+    if (error.response) {
+      const { status, data } = error.response
+      throw new HttpException(data, status)
+    }
+
+    if (error.request) {
+      throw new HttpException('외부 서버에서 응답이 없습니다', 504)
+    }
+
+    throw error
+  }
+
+  private async get(url: string, config?: AxiosRequestConfig) {
+    try {
+      const response = await this.httpService.axiosRef.get(url, config)
+      return response
+    } catch (error) {
+      this.axiosErrorHandler(error)
+    }
+  }
+
+  private async patch(
+    url: string,
+    data?: Record<string, any>,
+    config?: AxiosRequestConfig,
+  ) {
+    try {
+      const response = await this.httpService.axiosRef.patch(url, data, config)
+      return response
+    } catch (error) {
+      this.axiosErrorHandler(error)
     }
   }
 
@@ -62,12 +78,10 @@ export class RewardHttpService {
     return response.data
   }
 
-  async getUserRequestSuccessHistory(userId: string, eventDetailId: string) {
+  async requestGetUserSuccessHistory(userId: string, eventDetailId: string) {
     const url = `${this.AUTH_SERVER_URL}/user/userRequestSuccessHistory`
-    const response = await this.httpService.axiosRef.get(url, {
-      params: { userId, eventDetailId },
-    })
 
+    const response = await this.get(url, { params: { userId, eventDetailId } })
     return response.data
   }
 }

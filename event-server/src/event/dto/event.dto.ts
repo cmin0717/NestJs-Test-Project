@@ -12,6 +12,12 @@ import {
 import { IsObjectId } from '../../common/object-id-validator'
 import { subHours } from 'date-fns'
 
+function transformDate(value: any) {
+  return value instanceof Date
+    ? subHours(value, 9)
+    : subHours(new Date(value), 9)
+}
+
 export class EventDto {
   @IsString()
   title!: string
@@ -19,19 +25,11 @@ export class EventDto {
   @IsString()
   description!: string
 
-  @Transform(({ value }) => {
-    return value instanceof Date
-      ? subHours(value, 9)
-      : subHours(new Date(value), 9)
-  })
+  @Transform(transformDate)
   @IsDate()
   startDate!: Date
 
-  @Transform(({ value }) => {
-    return value instanceof Date
-      ? subHours(value, 9)
-      : subHours(new Date(value), 9)
-  })
+  @Transform(transformDate)
   @IsDate()
   endDate!: Date
 }

@@ -7,7 +7,7 @@ import {
   EventUpdateDto,
 } from './dto/event.dto'
 import { RequestUser, RequestUserData } from 'src/common/user.decorator'
-import { IsObjectIdPipe } from '@nestjs/mongoose'
+import { ObjectIdPipe } from 'src/common/object-id-validator'
 
 @Controller({ path: 'event' })
 export class EventController {
@@ -19,7 +19,9 @@ export class EventController {
   }
 
   @Get('/:eventId')
-  async getEventWithDetail(@Param('eventId', IsObjectIdPipe) eventId: string) {
+  async getActiveEventWithDetail(
+    @Param('eventId', ObjectIdPipe) eventId: string,
+  ) {
     return this.eventService.getActiveEventWithDetail(eventId)
   }
 
@@ -34,7 +36,7 @@ export class EventController {
   @Post('/detail/:eventId')
   async createEventDetail(
     @RequestUser() user: RequestUserData,
-    @Param('eventId', IsObjectIdPipe) eventId: string,
+    @Param('eventId', ObjectIdPipe) eventId: string,
     @Body() eventDetailDto: EventDetailDto,
   ) {
     return this.eventService.createEventDetail(user.id, eventId, eventDetailDto)
@@ -42,7 +44,7 @@ export class EventController {
 
   @Patch('/:eventId')
   async updateEvent(
-    @Param('eventId', IsObjectIdPipe) eventId: string,
+    @Param('eventId', ObjectIdPipe) eventId: string,
     @Body() eventUpdateDto: EventUpdateDto,
   ) {
     return this.eventService.updateEvent(eventId, eventUpdateDto)
@@ -50,7 +52,7 @@ export class EventController {
 
   @Patch('/detail/:eventDetailId')
   async updateEventDetail(
-    @Param('eventDetailId', IsObjectIdPipe) eventDetailId: string,
+    @Param('eventDetailId', ObjectIdPipe) eventDetailId: string,
     @Body() eventDetailUpdateDto: EventDetailUpdateDto,
   ) {
     return this.eventService.updateEventDetail(

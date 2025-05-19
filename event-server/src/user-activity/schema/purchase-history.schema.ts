@@ -5,7 +5,7 @@ import mongoose from 'mongoose'
 export class PurchaseHistory {
   id!: string
 
-  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId })
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, index: true })
   userId!: mongoose.Schema.Types.ObjectId
 
   @Prop({ required: true, type: Number })
@@ -21,3 +21,5 @@ export class PurchaseHistory {
 
 export const PurchaseHistorySchema =
   SchemaFactory.createForClass(PurchaseHistory)
+
+PurchaseHistorySchema.index({ createdAt: 1 })

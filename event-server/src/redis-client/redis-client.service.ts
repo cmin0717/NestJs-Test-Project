@@ -1,4 +1,4 @@
-import { Injectable, OnApplicationShutdown, OnModuleInit } from '@nestjs/common'
+import { Injectable, OnModuleInit } from '@nestjs/common'
 
 import { createClient, RedisClientType, SetOptions } from 'redis'
 
@@ -8,7 +8,7 @@ interface EvalOptions {
 }
 
 @Injectable()
-export class RedisClientService implements OnModuleInit, OnApplicationShutdown {
+export class RedisClientService implements OnModuleInit {
   private redisClient!: RedisClientType
 
   constructor() {}
@@ -19,12 +19,6 @@ export class RedisClientService implements OnModuleInit, OnApplicationShutdown {
     })
 
     await this.redisClient.connect()
-  }
-
-  async onApplicationShutdown() {
-    if (this.redisClient) {
-      await this.redisClient.quit()
-    }
   }
 
   async set(key: string, value: string, options?: SetOptions) {

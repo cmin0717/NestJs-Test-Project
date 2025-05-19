@@ -30,4 +30,3 @@ export class RewardHistory {
 }
 
 export const RewardHistorySchema = SchemaFactory.createForClass(RewardHistory)
-RewardHistorySchema.index({ userId: 1, eventDetailId: 1 })

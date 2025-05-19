@@ -9,6 +9,7 @@ import {
   UpdateDailyMonsterKillDto,
 } from './dto/user-activity-test.dto'
 import { RequestUser, RequestUserData } from 'src/common/user.decorator'
+import { ObjectIdPipe } from 'src/common/object-id-validator'
 
 @Controller({ path: 'user-activity-test' })
 export class UserActivityTestController {
@@ -73,7 +74,7 @@ export class UserActivityTestController {
 
   @Patch('daily-monster-kill/:id')
   async updateDailyMonsterKill(
-    @Param('id') id: string,
+    @Param('id', ObjectIdPipe) id: string,
     @Body() dto: UpdateDailyMonsterKillDto,
   ) {
     return this.userActivityTestService.updateDailyMonsterKill(id, dto)
@@ -81,7 +82,7 @@ export class UserActivityTestController {
 
   @Patch('access-game-information/:id')
   async updateAccessGameInformation(
-    @Param('id') id: string,
+    @Param('id', ObjectIdPipe) id: string,
     @Body() dto: UpdateAccessGameInformationDto,
   ) {
     return this.userActivityTestService.updateAccessGameInformation(id, dto)
