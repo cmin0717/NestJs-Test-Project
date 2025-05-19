@@ -85,12 +85,10 @@ export class UserService {
   async getUserRequestSuccessHistory(
     userId: string,
     eventDetailId: string,
-  ): Promise<boolean> {
-    const userRequestSuccessHistory = await this.userRequestSuccessHistoryModel
+  ): Promise<UserRequestSuccessHistory | null> {
+    return await this.userRequestSuccessHistoryModel
       .findOne({ userId, eventDetailId })
       .exec()
-
-    return userRequestSuccessHistory ? true : false
   }
 
   async updateUserCash(userId: string, cashDto: UserCashDto): Promise<void> {
