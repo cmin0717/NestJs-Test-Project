@@ -10,7 +10,7 @@ import {
   IsUrl,
   ValidateNested,
 } from 'class-validator'
-import { IsObjectId } from 'src/common/object-id-validator'
+import { IsObjectId } from '../../common/object-id-validator'
 
 export class EventDto {
   @IsString()
@@ -26,6 +26,22 @@ export class EventDto {
   endDate!: Date
 }
 
+export class DailyPcRoomTimeRequirementDto {
+  @IsNumber()
+  dailyPcRoomTime!: number
+
+  @IsString()
+  attendanceDate!: string
+}
+
+export class DailyMonsterKillCountRequirementDto {
+  @IsNumber()
+  dailyMonsterKillCount!: number
+
+  @IsString()
+  attendanceDate!: string
+}
+
 export class EventRequirementDto {
   @IsString({ each: true })
   @IsOptional()
@@ -39,13 +55,17 @@ export class EventRequirementDto {
   @IsOptional()
   accumulatedPcRoomTime?: number
 
-  @IsNumber()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => DailyPcRoomTimeRequirementDto)
   @IsOptional()
-  dailyPcRoomTime?: number
+  dailyPcRoomTime?: DailyPcRoomTimeRequirementDto
 
-  @IsNumber()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => DailyMonsterKillCountRequirementDto)
   @IsOptional()
-  dailyMonsterKillCount?: number
+  dailyMonsterKillCount?: DailyMonsterKillCountRequirementDto
 
   @IsNumber()
   @IsOptional()

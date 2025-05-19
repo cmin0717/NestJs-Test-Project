@@ -6,7 +6,11 @@ import { AccessGameInformation } from './schema/access-game-information.schema'
 import { PurchaseHistory } from './schema/purchase-history.schema'
 import { PageVisit } from './schema/page-visit.schema'
 import { format } from 'date-fns'
-import { EventRequirementDto } from 'src/event/dto/event.dto'
+import {
+  DailyMonsterKillCountRequirementDto,
+  DailyPcRoomTimeRequirementDto,
+  EventRequirementDto,
+} from 'src/event/dto/event.dto'
 
 @Injectable()
 export class UserActivityService {
@@ -173,37 +177,42 @@ export class UserActivityService {
     return totalPcRoomTime >= accumulatedPcRoomTime
   }
 
-  private async checkDailyPcRoomTime(userId: string, dailyPcRoomTime: number) {
-    const currentDate = new Date()
-    const dateString = format(currentDate, 'yyyy-MM-dd')
-    const loginInfo = await this.accessGameInformationModel.findOne({
+  private async checkDailyPcRoomTime(
+    userId: string,
+    dailyPcRoomTimeDto: DailyPcRoomTimeRequirementDto,
+  ) {
+    const accessGameInfo = await this.accessGameInformationModel.findOne({
       userId,
-      dateString,
+      dateString: dailyPcRoomTimeDto.attendanceDate,
     })
 
-    if (!loginInfo) {
+    if (!accessGameInfo) {
       return false
     }
 
-    return loginInfo.dailyPcRoomAccumulatedTime >= dailyPcRoomTime
+    return (
+      accessGameInfo.dailyPcRoomAccumulatedTime >=
+      dailyPcRoomTimeDto.dailyPcRoomTime
+    )
   }
 
   private async checkDailyMonsterKillCount(
     userId: string,
-    dailyMonsterKillCount: number,
+    dailyMonsterKillCountDto: DailyMonsterKillCountRequirementDto,
   ) {
-    const currentDate = new Date()
-    const dateString = format(currentDate, 'yyyy-MM-dd')
     const dailyMonsterKills = await this.dailyMonsterKillModel.findOne({
       userId,
-      dateString,
+      dateString: dailyMonsterKillCountDto.attendanceDate,
     })
 
     if (!dailyMonsterKills) {
       return false
     }
 
-    return dailyMonsterKills.monsterKillCount >= dailyMonsterKillCount
+    return (
+      dailyMonsterKills.monsterKillCount >=
+      dailyMonsterKillCountDto.dailyMonsterKillCount
+    )
   }
 
   private async checkAccumulatedPurchaseAmount(

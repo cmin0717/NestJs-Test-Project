@@ -12,12 +12,12 @@ import {
   RewardUpdateDto,
 } from './dto/reward.dto'
 import { RewardHistory } from './schema/reward-history.schema'
-import { UserActivityService } from 'src/user-activity/user-activity.service'
-import { CriticalSection } from 'src/distributed-lock/decorator/critical-section.decorator'
-import { LockParam } from 'src/distributed-lock/decorator/lockable-param.decorator'
+import { UserActivityService } from '../user-activity/user-activity.service'
+import { CriticalSection } from '../distributed-lock/decorator/critical-section.decorator'
+import { LockParam } from '../distributed-lock/decorator/lockable-param.decorator'
 import { RewardType } from './enum/reward.enum'
 import { RewardHistoryState } from './enum/reward-history.enum'
-import { EventService } from 'src/event/event.service'
+import { EventService } from '../event/event.service'
 import { RewardHistoryPagingResponse } from './interface/reward-history.interface'
 import { RewardHttpService } from './reward-http.service'
 
@@ -143,12 +143,15 @@ export class RewardService {
 
     try {
       await this.sendRewardToUser(userId, reward, eventDetail.reward.amount)
+
       rewardHistoryForm.state = RewardHistoryState.COMPLETED
       return await rewardHistoryForm.save()
     } catch (error) {
       await this.eventService.increaseAvailableRewardCount(eventDetail.id, 1)
+
       rewardHistoryForm.state = RewardHistoryState.FAILED
       await rewardHistoryForm.save()
+
       throw error
     }
   }

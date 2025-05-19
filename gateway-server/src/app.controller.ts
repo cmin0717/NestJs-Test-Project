@@ -53,6 +53,18 @@ export class TestController {
     }
   }
 
+  @Post('make-data-set')
+  @ApiOperation({ summary: '데이터 세트 생성' })
+  async makeDataSet() {
+    try {
+      await this.authServerHttpService.makeDataSet()
+
+      return '데이터 세트 생성 완료(데이터 생성은 한번만 이용해주세요)'
+    } catch (error) {
+      return '데이터 세트 생성 실패'
+    }
+  }
+
   @Get('user-activity-test/daily-monster-kills')
   @ApiOperation({ summary: '유저 몬스터 처치 횟수 리스트 조회' })
   @UseGuards(JwtAuthGuard)

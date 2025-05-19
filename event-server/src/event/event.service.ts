@@ -148,6 +148,13 @@ export class EventService {
       throw new NotFoundException('Event detail not found')
     }
 
+    const event = await this.getEvent(eventDetail.eventId.toString())
+    if (event.active) {
+      throw new BadRequestException(
+        'Active event update is not allowed, turn off active first',
+      )
+    }
+
     const updatedEventDetail = await this.eventDetailModel.findByIdAndUpdate(
       eventDetail.id,
       { $set: { ...eventDetailUpdateDto } },
@@ -161,8 +168,13 @@ export class EventService {
     eventDetailId: string,
     number: number,
   ): Promise<void> {
-    const updatedEventDetail = await this.eventDetailModel.findByIdAndUpdate(
-      { _id: eventDetailId, availableRewardCount: { $gte: number } },
+    const query = { _id: eventDetailId }
+    if (number < 0) {
+      query['availableRewardCount'] = { $gte: Math.abs(number) }
+    }
+
+    const updatedEventDetail = await this.eventDetailModel.findOneAndUpdate(
+      query,
       {
         $inc: { availableRewardCount: number },
       },

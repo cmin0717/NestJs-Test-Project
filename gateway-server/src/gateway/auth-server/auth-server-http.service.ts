@@ -44,24 +44,17 @@ export class AuthServerHttpService {
       if (error.isAxiosError) {
         const axiosError = error
 
-        // 응답이 있는 경우 (서버에서 응답이 왔을 때)
         if (axiosError.response) {
           const { status, data } = axiosError.response
 
-          // 원본 상태 코드와 응답 데이터로 HttpException 생성
           throw new HttpException(data, status)
         }
 
-        // 요청이 이루어졌으나 응답이 없는 경우 (타임아웃 등)
         if (axiosError.request) {
-          throw new HttpException(
-            '외부 서버에서 응답이 없습니다',
-            504, // Gateway Timeout
-          )
+          throw new HttpException('외부 서버에서 응답이 없습니다', 504)
         }
       }
 
-      // 기타 예외는 그대로 전파 (500 에러로 처리됨)
       console.error('예상치 못한 에러:', error)
       throw error
     }
@@ -74,5 +67,34 @@ export class AuthServerHttpService {
     )
 
     return res.data
+  }
+
+  async makeDataSet() {
+    const userSet = [
+      {
+        email: 'admin@admin.com',
+        password: '1234',
+        role: 'ADMIN',
+      },
+      {
+        email: 'operator@operator.com',
+        password: '1234',
+        role: 'OPERATOR',
+      },
+      {
+        email: 'auditor@auditor.com',
+        password: '1234',
+        role: 'AUDITOR',
+      },
+      {
+        email: 'user@user.com',
+        password: '1234',
+        role: 'USER',
+      },
+    ]
+
+    for (const user of userSet) {
+      await this.httpService.axiosRef.post(`${this.baseUrl}/user/signup`, user)
+    }
   }
 }

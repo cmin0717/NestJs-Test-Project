@@ -1,6 +1,34 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { RewardHistoryState, RewardType } from './event-servet.enum'
 
+class DailyPcRoomTimeRequirementDto {
+  @ApiProperty({
+    description: '일일 PC 방 시간(단위 분)',
+    example: 180,
+  })
+  dailyPcRoomTime!: number
+
+  @ApiProperty({
+    description: '참여 날짜',
+    example: '2025-05-22',
+  })
+  attendanceDate!: string
+}
+
+class DailyMonsterKillCountRequirementDto {
+  @ApiProperty({
+    description: '일일 몬스터 처치 수',
+    example: 200,
+  })
+  dailyMonsterKillCount!: number
+
+  @ApiProperty({
+    description: '참여 날짜',
+    example: '2025-05-22',
+  })
+  attendanceDate!: string
+}
+
 class EventRequirementDto {
   @ApiProperty({
     description: '이벤트 참여 날짜',
@@ -29,18 +57,24 @@ class EventRequirementDto {
   @ApiProperty({
     description: '일일 PC 방 시간(단위 분)',
     required: false,
-    type: Number,
-    example: 180,
+    type: DailyPcRoomTimeRequirementDto,
+    example: {
+      dailyPcRoomTime: 180,
+      attendanceDate: '2025-05-22',
+    },
   })
-  dailyPcRoomTime?: number
+  dailyPcRoomTime?: DailyPcRoomTimeRequirementDto
 
   @ApiProperty({
     description: '일일 몬스터 처치 수',
     required: false,
     type: Number,
-    example: 200,
+    example: {
+      dailyMonsterKillCount: 200,
+      attendanceDate: '2025-05-22',
+    },
   })
-  dailyMonsterKillCount?: number
+  dailyMonsterKillCount?: DailyMonsterKillCountRequirementDto
 
   @ApiProperty({
     description: '누적 구매 금액(단위 원)',
