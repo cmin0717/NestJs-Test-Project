@@ -14,7 +14,7 @@ docker compose up --build
 
 애플리케이션이 실행된 후, Gateway 서버의 스웨거 문서는 다음 주소에서 접근할 수 있습니다.
 
-- **스웨거 UI**: [http://localhost:3000/swagger](https://localhost:3000/swagger)
+- **스웨거 UI**: [http://localhost:3000/swagger](http://localhost:3000/swagger)
 
 <br>
 
@@ -94,7 +94,7 @@ docker compose up --build
     <summary>유저 활동 데이터 조작 방법</summary>  
     <br>
   
-    **테스트 관련 API를 통해 각각의 유저 활동 데이터를 생성할 수 있습니다.**
+    **테스트 관련 API를 통해 각각의 유저 활동 데이터를 스웨거에서 편하게 생성할 수 있습니다.**
     
   - **게임 접속 정보 (Access Game Information)**
       - POST 요청을 통해 접속한 날짜를 'yyyy-mm-dd' 형식으로 입력하여 데이터를 생성할 수 있습니다.
@@ -107,7 +107,7 @@ docker compose up --build
   
   - **결제 내역 (Purchase History)**
       - POST 요청을 통해 결제 금액을 입력하여 내역을 생성할 수 있습니다.
-      - `isPaid` 필드를 통해 이벤트로 받은 금액인지 구별할 수 있도록 했습니다.
+      - `isPaid` 필드를 통해 이벤트로 받은 금액인지 실제 결제 금액인지 구별할 수 있도록 했습니다.
   
   - **페이지 방문 정보 (Page Visit)**
       - POST 요청을 통해 방문한 페이지 URL을 입력하여 내역을 생성할 수 있습니다.
