@@ -118,11 +118,10 @@ export class RewardService {
 
     const eventDetail = await this.eventService.getEventDetail(eventDetailId)
 
-    const event = await this.eventService.getActiveEvent(
-      eventDetail.eventId.toString(),
-    )
-
-    const reward = await this.getReward(eventDetail.reward.rewardId)
+    const [event, reward] = await Promise.all([
+      this.eventService.getActiveEvent(eventDetail.eventId.toString()),
+      this.getReward(eventDetail.reward.rewardId),
+    ])
 
     await this.userActivityService.checkRewardEligibility(
       userId,
@@ -139,7 +138,18 @@ export class RewardService {
       amount: eventDetail.reward.amount,
     })
 
-    await this.eventService.increaseAvailableRewardCount(eventDetail.id, -1)
+    try {
+      await this.eventService.increaseAvailableRewardCount(eventDetail.id, -1)
+    } catch (error) {
+      if (
+        error instanceof NotFoundException &&
+        error.message === 'Event available reward count is not enough'
+      ) {
+        await this.eventService.updateEvent(event.id, { active: false })
+      }
+
+      throw error
+    }
 
     try {
       await this.sendRewardToUser(userId, reward, eventDetail.reward.amount)

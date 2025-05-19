@@ -5,7 +5,7 @@ import { JwtAuthGuard } from 'src/common/jwt.guard'
 import { Roles, RolesGuard } from 'src/common/role.guard'
 import { Request } from 'express'
 import { AuthServerHttpService } from '../auth-server-http.service'
-import { SignupDto, UpdateUserRoleDto } from '../auth-server-swagger.dto'
+import { SignupDto, UpdateUserRoleDto } from '../swagger/user.dto'
 import { RoleEnum } from '../auth-server.enum'
 
 @Controller({ path: 'auth-server/user' })

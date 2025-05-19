@@ -3,7 +3,7 @@ import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger'
 
 import { Request, Response } from 'express'
 import { AuthServerHttpService } from '../auth-server-http.service'
-import { LoginDto } from '../auth-server-swagger.dto'
+import { LoginDto } from '../swagger/auth.dto'
 
 @Controller({ path: 'auth-server/auth' })
 @ApiTags('인증 서버 - Auth')

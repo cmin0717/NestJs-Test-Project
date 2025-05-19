@@ -58,7 +58,7 @@ export class TestController {
   async makeDataSet() {
     try {
       await this.authServerHttpService.makeDataSet()
-
+      await this.eventServerHttpService.makeDataSet()
       return '데이터 세트 생성 완료(데이터 생성은 한번만 이용해주세요)'
     } catch (error) {
       return '데이터 세트 생성 실패'

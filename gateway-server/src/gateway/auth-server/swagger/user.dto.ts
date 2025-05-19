@@ -1,19 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { RoleEnum } from './auth-server.enum'
-
-export class LoginDto {
-  @ApiProperty({
-    description: '이메일',
-    example: 'test@test.com',
-  })
-  email!: string
-
-  @ApiProperty({
-    description: '비밀번호',
-    example: 'test1234',
-  })
-  password!: string
-}
+import { RoleEnum } from '../auth-server.enum'
 
 export class SignupDto {
   @ApiProperty({

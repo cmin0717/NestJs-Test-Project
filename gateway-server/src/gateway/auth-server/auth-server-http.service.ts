@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios'
 import { HttpException, Injectable } from '@nestjs/common'
 import { Request } from 'express'
+import { MakeUserDataSet } from 'src/app.controller.dto'
 
 @Injectable()
 export class AuthServerHttpService {
@@ -70,30 +71,7 @@ export class AuthServerHttpService {
   }
 
   async makeDataSet() {
-    const userSet = [
-      {
-        email: 'admin@admin.com',
-        password: '1234',
-        role: 'ADMIN',
-      },
-      {
-        email: 'operator@operator.com',
-        password: '1234',
-        role: 'OPERATOR',
-      },
-      {
-        email: 'auditor@auditor.com',
-        password: '1234',
-        role: 'AUDITOR',
-      },
-      {
-        email: 'user@user.com',
-        password: '1234',
-        role: 'USER',
-      },
-    ]
-
-    for (const user of userSet) {
+    for (const user of MakeUserDataSet) {
       await this.httpService.axiosRef.post(`${this.baseUrl}/user/signup`, user)
     }
   }

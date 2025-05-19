@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios'
 import { HttpException, Injectable } from '@nestjs/common'
 import { Request } from 'express'
+import { MakeEventDataSet, MakeRewardDataSet } from 'src/app.controller.dto'
 
 @Injectable()
 export class EventServerHttpService {
@@ -58,5 +59,55 @@ export class EventServerHttpService {
       console.error('예상치 못한 에러:', error)
       throw error
     }
+  }
+
+  async makeDataSet() {
+    const userId = '6829eefaf9215c45a216f29e'
+
+    const config = {
+      headers: {
+        'X-User-Data': JSON.stringify({ id: userId, role: 'ADMIN' }),
+      },
+    }
+
+    const rewards = await Promise.all(
+      MakeRewardDataSet.map(async (v) => {
+        const res = await this.httpService.axiosRef.post(
+          `${this.baseUrl}/reward`,
+          v,
+          config,
+        )
+        return res.data
+      }),
+    )
+
+    await Promise.all(
+      MakeEventDataSet.map(async (v) => {
+        const res = await this.httpService.axiosRef.post(
+          `${this.baseUrl}/event`,
+          v,
+          config,
+        )
+
+        const event = res.data
+
+        await Promise.all(
+          v.eventDetails.map((v1) => {
+            const rewardId = rewards[v1.reward.index]._id
+            return this.httpService.axiosRef.post(
+              `${this.baseUrl}/event/detail/${event._id}`,
+              {
+                ...v1,
+                reward: {
+                  rewardId,
+                  amount: v1.reward.amount,
+                },
+              },
+              config,
+            )
+          }),
+        )
+      }),
+    )
   }
 }

@@ -12,6 +12,9 @@ export class Reward {
   @Prop({ required: true, type: String })
   name!: string
 
+  @Prop({ required: true, type: String })
+  description!: string
+
   @Prop({ required: true, enum: RewardType, type: String })
   type!: RewardType
 
