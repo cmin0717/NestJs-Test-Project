@@ -30,7 +30,7 @@ class DailyMonsterKillCountRequirementDto {
 
 class EventRequirementDto {
   @ApiProperty({
-    description: '이벤트 참여 날짜',
+    description: '이벤트 참여 날짜들',
     required: false,
     type: [String],
     example: ['2025-05-22', '2025-05-23'],
@@ -67,7 +67,7 @@ class EventRequirementDto {
   @ApiProperty({
     description: '일일 몬스터 처치 수',
     required: false,
-    type: Number,
+    type: DailyMonsterKillCountRequirementDto,
     example: {
       dailyMonsterKillCount: 200,
       attendanceDate: '2025-05-22',

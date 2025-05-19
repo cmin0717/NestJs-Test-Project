@@ -14,7 +14,10 @@ export class AuthServerUserController {
   constructor(private readonly authServerHttpService: AuthServerHttpService) {}
 
   @Get('')
-  @ApiOperation({ summary: '유저 정보 조회[모두 이용 가능]' })
+  @ApiOperation({
+    summary: '유저 정보 조회[모두 이용 가능]',
+    description: '해당 API를 통해 지급 받은 보상을 확인 할 수 있습니다.',
+  })
   @UseGuards(JwtAuthGuard)
   @ApiSecurity('jwt')
   async getUser(@Req() req: Request) {

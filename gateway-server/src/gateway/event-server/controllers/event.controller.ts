@@ -26,7 +26,11 @@ export class EventServerEventController {
   ) {}
 
   @Get('/')
-  @ApiOperation({ summary: '모든 이벤트 조회[모두 이용 가능]' })
+  @ApiOperation({
+    summary: '모든 이벤트 조회[모두 이용 가능]',
+    description:
+      '이벤트 조회 -> 이벤트 Id로 Active 이벤트 상세 조회 -> 조건이 맞는 이벤트 디테일 Id로 보상 요청',
+  })
   @UseGuards(JwtAuthGuard)
   @ApiSecurity('jwt')
   async getEvents(@Req() req: Request) {

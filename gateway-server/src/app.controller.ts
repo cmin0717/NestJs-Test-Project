@@ -54,7 +54,10 @@ export class TestController {
   }
 
   @Post('make-data-set')
-  @ApiOperation({ summary: '데이터 세트 생성[한번만 이용해주세요]' })
+  @ApiOperation({
+    summary: '데이터 세트 생성',
+    description: '예외 처리를 하지 않았기에 한번만 요청해주새요',
+  })
   async makeDataSet() {
     try {
       await this.authServerHttpService.makeDataSet()
@@ -98,7 +101,11 @@ export class TestController {
   }
 
   @Post('user-activity-test/daily-monster-kill')
-  @ApiOperation({ summary: '유저 몬스터 처치 횟수 생성' })
+  @ApiOperation({
+    summary: '유저 몬스터 처치 횟수 생성',
+    description:
+      '몬스터 처치 수를 변경하기 위해서는 PATCH를 통해 몬스터 처치 횟수를 수정해주세요.',
+  })
   @ApiBody({ type: DailyMonsterKillDto })
   @UseGuards(JwtAuthGuard)
   @ApiSecurity('jwt')
@@ -107,7 +114,11 @@ export class TestController {
   }
 
   @Post('user-activity-test/access-game-information')
-  @ApiOperation({ summary: '유저 게임 접속 정보 생성' })
+  @ApiOperation({
+    summary: '유저 게임 접속 정보 생성',
+    description:
+      '일일 누적 시간 및 일일 PC방 누적 시간을 변경하기 위해서는 PATCH를 통해 일일 누적 시간을 수정해주세요.',
+  })
   @ApiBody({ type: AccessGameInformationDto })
   @UseGuards(JwtAuthGuard)
   @ApiSecurity('jwt')
