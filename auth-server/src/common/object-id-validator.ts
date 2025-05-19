@@ -1,3 +1,4 @@
+import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common'
 import {
   registerDecorator,
   ValidationOptions,
@@ -6,6 +7,17 @@ import {
   ValidationArguments,
 } from 'class-validator'
 import { isValidObjectId } from 'mongoose'
+
+@Injectable()
+export class ObjectIdPipe implements PipeTransform {
+  async transform(value: string) {
+    if (!isValidObjectId(value)) {
+      throw new BadRequestException(`${value} is not a valid ObjectId`)
+    }
+
+    return value
+  }
+}
 
 @ValidatorConstraint({ async: false })
 export class IsObjectIdConstraint implements ValidatorConstraintInterface {

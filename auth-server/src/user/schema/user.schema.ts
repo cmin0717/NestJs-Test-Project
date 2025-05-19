@@ -10,7 +10,7 @@ import { UserCouponDto, UserItemDto } from '../dto/user.dto'
 export class User extends mongoose.Document {
   id!: string
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, index: true, unique: true })
   email!: string
 
   @Prop({ required: true })

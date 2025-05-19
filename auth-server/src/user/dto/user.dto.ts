@@ -29,31 +29,31 @@ export class RoleDto {
 }
 
 export class UserItemDto {
+  @IsObjectId()
+  eventDetailId!: string
+
   @IsString()
   name!: string
 
   @IsNumber()
   amount!: number
-
-  @IsObjectId()
-  eventDetailId!: string
 }
 
 export class UserCouponDto {
+  @IsObjectId()
+  eventDetailId!: string
+
   @IsString()
   name!: string
 
   @IsNumber()
   amount!: number
-
-  @IsObjectId()
-  eventDetailId!: string
 }
 
 export class UserCashDto {
-  @IsNumber()
-  amount!: number
-
   @IsObjectId()
   eventDetailId!: string
+
+  @IsNumber()
+  amount!: number
 }

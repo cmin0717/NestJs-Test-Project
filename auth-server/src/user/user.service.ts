@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { User } from './schema/user.schema'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -10,7 +14,7 @@ import {
   UserCashDto,
 } from './dto/user.dto'
 import { hashSHA256 } from 'src/common/util'
-import { RoleEnum } from './enum/user.enum'
+
 import { UserRequestSuccessHistory } from './schema/user-request-success-history.schema'
 
 @Injectable()
@@ -26,7 +30,7 @@ export class UserService {
     const user = await this.userModel.findById(userId).exec()
 
     if (!user) {
-      throw new BadRequestException('Invalid credentials')
+      throw new NotFoundException('User not found')
     }
 
     return user
@@ -40,7 +44,7 @@ export class UserService {
     const user = await this.userModel.findOne({ email, hashedPassword }).exec()
 
     if (!user) {
-      throw new BadRequestException('Invalid credentials')
+      throw new NotFoundException('User not found')
     }
 
     return user
@@ -50,7 +54,7 @@ export class UserService {
     const user = await this.userModel.findOne({ email: signupDto.email }).exec()
 
     if (user) {
-      throw new BadRequestException('User already exists')
+      throw new BadRequestException('This email already exists')
     }
 
     const hashedPassword = await hashSHA256(signupDto.password)
@@ -63,20 +67,18 @@ export class UserService {
     return await newUserForm.save()
   }
 
-  async updateUserRole(userId: string, roleDto: RoleDto): Promise<User> {
-    const user = await this.findOneByUserId(userId)
-
-    if (user.role !== RoleEnum.ADMIN) {
-      throw new BadRequestException('User is not admin')
-    }
-
+  async updateUserRole(roleDto: RoleDto): Promise<User> {
     const { targetUserId, role } = roleDto
-    const targetUser = await this.userModel.findByIdAndUpdate(targetUserId, {
-      $set: { role },
-    })
+    const targetUser = await this.userModel.findByIdAndUpdate(
+      targetUserId,
+      {
+        $set: { role },
+      },
+      { new: true },
+    )
 
     if (!targetUser) {
-      throw new BadRequestException('Target user not found')
+      throw new NotFoundException('Target user not found')
     }
 
     return targetUser
@@ -102,7 +104,7 @@ export class UserService {
     )
 
     if (!updatedUser) {
-      throw new BadRequestException('User not found')
+      throw new NotFoundException('User not found')
     }
 
     await this.userRequestSuccessHistoryModel.create({
@@ -122,7 +124,7 @@ export class UserService {
     )
 
     if (!updatedUser) {
-      throw new BadRequestException('User not found')
+      throw new NotFoundException('User not found')
     }
 
     await this.userRequestSuccessHistoryModel.create({
@@ -145,7 +147,7 @@ export class UserService {
     )
 
     if (!updatedUser) {
-      throw new BadRequestException('User not found')
+      throw new NotFoundException('User not found')
     }
 
     await this.userRequestSuccessHistoryModel.create({

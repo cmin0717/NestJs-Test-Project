@@ -15,22 +15,21 @@ import {
   UserCouponDto,
   UserItemDto,
 } from './dto/user.dto'
-import { RequestUser, RequestUserData } from 'src/common/user.decorator'
-import { IsObjectIdPipe } from '@nestjs/mongoose'
+import { ObjectIdPipe } from 'src/common/object-id-validator'
 
 @Controller({ path: 'user' })
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('/findOneByUserId')
-  async findOneByUserId(@Query('userId') userId: string) {
+  async findOneByUserId(@Query('userId', ObjectIdPipe) userId: string) {
     return this.userService.findOneByUserId(userId)
   }
 
   @Get('/userRequestSuccessHistory')
   async getUserRequestSuccessHistory(
-    @Query('userId') userId: string,
-    @Query('eventDetailId') eventDetailId: string,
+    @Query('userId', ObjectIdPipe) userId: string,
+    @Query('eventDetailId', ObjectIdPipe) eventDetailId: string,
   ) {
     return this.userService.getUserRequestSuccessHistory(userId, eventDetailId)
   }
@@ -41,16 +40,13 @@ export class UserController {
   }
 
   @Patch('/role')
-  async updateUserRole(
-    @RequestUser() user: RequestUserData,
-    @Body() roleDto: RoleDto,
-  ) {
-    return this.userService.updateUserRole(user.id, roleDto)
+  async updateUserRole(@Body() roleDto: RoleDto) {
+    return this.userService.updateUserRole(roleDto)
   }
 
   @Patch('/cash/:userId')
   async updateUserCash(
-    @Param('userId', IsObjectIdPipe) userId: string,
+    @Param('userId', ObjectIdPipe) userId: string,
     @Body() cashDto: UserCashDto,
   ) {
     return this.userService.updateUserCash(userId, cashDto)
@@ -58,7 +54,7 @@ export class UserController {
 
   @Patch('/item/:userId')
   async updateUserItem(
-    @Param('userId', IsObjectIdPipe) userId: string,
+    @Param('userId', ObjectIdPipe) userId: string,
     @Body() itemDto: UserItemDto,
   ) {
     return this.userService.updateUserItem(userId, itemDto)
@@ -66,7 +62,7 @@ export class UserController {
 
   @Patch('/coupon/:userId')
   async updateUserCoupon(
-    @Param('userId', IsObjectIdPipe) userId: string,
+    @Param('userId', ObjectIdPipe) userId: string,
     @Body() couponDto: UserCouponDto,
   ) {
     return this.userService.updateUserCoupon(userId, couponDto)
