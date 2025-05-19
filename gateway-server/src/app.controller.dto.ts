@@ -131,7 +131,6 @@ export const MakeRewardDataSet = [
   },
 ]
 
-// 캐시, 목장갑, 붉은채찍, 몽둥이, 검, 경험치2배, 캐시20할인
 export const MakeEventDataSet = [
   {
     title: '출석 이벤트',
