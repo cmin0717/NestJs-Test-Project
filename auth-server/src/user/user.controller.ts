@@ -27,6 +27,14 @@ export class UserController {
     return this.userService.findOneByUserId(userId)
   }
 
+  @Get('/userRequestSuccessHistory')
+  async getUserRequestSuccessHistory(
+    @Query('userId') userId: string,
+    @Query('eventDetailId') eventDetailId: string,
+  ) {
+    return this.userService.getUserRequestSuccessHistory(userId, eventDetailId)
+  }
+
   @Post('/signup')
   signup(@Body() signupDto: SignupDto) {
     return this.userService.signup(signupDto)

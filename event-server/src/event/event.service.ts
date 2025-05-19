@@ -182,7 +182,9 @@ export class EventService {
     )
 
     if (!updatedEventDetail) {
-      throw new NotFoundException('Event available reward count is not enough')
+      throw new BadRequestException(
+        'Event available reward count is not enough',
+      )
     }
   }
 }

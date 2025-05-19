@@ -11,12 +11,15 @@ import {
 } from './dto/user.dto'
 import { hashSHA256 } from 'src/common/util'
 import { RoleEnum } from './enum/user.enum'
+import { UserRequestSuccessHistory } from './schema/user-request-success-history.schema'
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name)
     private userModel: Model<User>,
+    @InjectModel(UserRequestSuccessHistory.name)
+    private userRequestSuccessHistoryModel: Model<UserRequestSuccessHistory>,
   ) {}
 
   async findOneByUserId(userId: string): Promise<User> {
@@ -54,6 +57,7 @@ export class UserService {
     const newUserForm = new this.userModel({
       email: signupDto.email,
       hashedPassword,
+      role: signupDto.role,
     })
 
     return await newUserForm.save()
@@ -78,11 +82,23 @@ export class UserService {
     return targetUser
   }
 
+  async getUserRequestSuccessHistory(
+    userId: string,
+    eventDetailId: string,
+  ): Promise<boolean> {
+    const userRequestSuccessHistory = await this.userRequestSuccessHistoryModel
+      .findOne({ userId, eventDetailId })
+      .exec()
+
+    return userRequestSuccessHistory ? true : false
+  }
+
   async updateUserCash(userId: string, cashDto: UserCashDto): Promise<void> {
+    const { amount, eventDetailId } = cashDto
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
       {
-        $inc: { cash: cashDto.amount },
+        $inc: { cash: amount },
       },
       { new: true },
     )
@@ -90,13 +106,19 @@ export class UserService {
     if (!updatedUser) {
       throw new BadRequestException('User not found')
     }
+
+    await this.userRequestSuccessHistoryModel.create({
+      userId,
+      eventDetailId,
+    })
   }
 
   async updateUserItem(userId: string, itemDto: UserItemDto): Promise<void> {
+    const { name, amount, eventDetailId } = itemDto
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
       {
-        $push: { items: itemDto },
+        $push: { items: { name, amount } },
       },
       { new: true },
     )
@@ -104,16 +126,22 @@ export class UserService {
     if (!updatedUser) {
       throw new BadRequestException('User not found')
     }
+
+    await this.userRequestSuccessHistoryModel.create({
+      userId,
+      eventDetailId,
+    })
   }
 
   async updateUserCoupon(
     userId: string,
     couponDto: UserCouponDto,
   ): Promise<void> {
+    const { name, amount, eventDetailId } = couponDto
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
       {
-        $push: { coupons: couponDto },
+        $push: { coupons: { name, amount } },
       },
       { new: true },
     )
@@ -121,5 +149,10 @@ export class UserService {
     if (!updatedUser) {
       throw new BadRequestException('User not found')
     }
+
+    await this.userRequestSuccessHistoryModel.create({
+      userId,
+      eventDetailId,
+    })
   }
 }

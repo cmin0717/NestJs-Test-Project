@@ -11,6 +11,7 @@ import {
   DailyPcRoomTimeRequirementDto,
   EventRequirementDto,
 } from 'src/event/dto/event.dto'
+import { Event } from 'src/event/schema/event.schema'
 
 @Injectable()
 export class UserActivityService {
@@ -27,78 +28,74 @@ export class UserActivityService {
 
   async checkRewardEligibility(
     userId: string,
-    eventStartDate: Date,
-    eventEndDate: Date,
+    event: Event,
     eventRequirementDto: EventRequirementDto,
   ): Promise<void> {
+    const { startDate, endDate } = event
+    const {
+      specificAttendanceDates,
+      accumulatedAttendanceDays,
+      accumulatedPcRoomTime,
+      dailyPcRoomTime,
+      accumulatedPurchaseAmount,
+      dailyMonsterKillCount,
+      specificPageAccess,
+    } = eventRequirementDto
+
     const validations = [
       {
-        condition: eventRequirementDto.specificAttendanceDates,
+        condition: specificAttendanceDates,
         check: () =>
-          this.checkSpecificAttendanceDates(
-            userId,
-            eventRequirementDto.specificAttendanceDates,
-          ),
+          this.checkSpecificAttendanceDates(userId, specificAttendanceDates),
         message: '특정 출석일 요구사항을 만족하지 않습니다',
       },
       {
-        condition: eventRequirementDto.accumulatedAttendanceDays,
+        condition: accumulatedAttendanceDays,
         check: () =>
           this.checkAccumulatedAttendanceDays(
             userId,
-            eventStartDate,
-            eventEndDate,
-            eventRequirementDto.accumulatedAttendanceDays,
+            startDate,
+            endDate,
+            accumulatedAttendanceDays,
           ),
         message: '누적 출석일 요구사항을 만족하지 않습니다',
       },
       {
-        condition: eventRequirementDto.accumulatedPcRoomTime,
+        condition: accumulatedPcRoomTime,
         check: () =>
           this.checkAccumulatedPcRoomTime(
             userId,
-            eventStartDate,
-            eventEndDate,
-            eventRequirementDto.accumulatedPcRoomTime,
+            startDate,
+            endDate,
+            accumulatedPcRoomTime,
           ),
         message: '누적 PC방 이용시간 요구사항을 만족하지 않습니다',
       },
       {
-        condition: eventRequirementDto.dailyPcRoomTime,
-        check: () =>
-          this.checkDailyPcRoomTime(
-            userId,
-            eventRequirementDto.dailyPcRoomTime,
-          ),
+        condition: dailyPcRoomTime,
+        check: () => this.checkDailyPcRoomTime(userId, dailyPcRoomTime),
         message: '당일 PC방 이용시간 요구사항을 만족하지 않습니다',
       },
       {
-        condition: eventRequirementDto.accumulatedPurchaseAmount,
+        condition: accumulatedPurchaseAmount,
         check: () =>
           this.checkAccumulatedPurchaseAmount(
             userId,
-            eventStartDate,
-            eventEndDate,
-            eventRequirementDto.accumulatedPurchaseAmount,
+            startDate,
+            endDate,
+            accumulatedPurchaseAmount,
           ),
         message: '누적 캐시 충전 요구사항을 만족하지 않습니다',
       },
       {
-        condition: eventRequirementDto.dailyMonsterKillCount,
+        condition: dailyMonsterKillCount,
         check: () =>
-          this.checkDailyMonsterKillCount(
-            userId,
-            eventRequirementDto.dailyMonsterKillCount,
-          ),
+          this.checkDailyMonsterKillCount(userId, dailyMonsterKillCount),
         message: '당일 몬스터 처치 요구사항을 만족하지 않습니다',
       },
       {
-        condition: eventRequirementDto.specificPageAccess,
-        check: () =>
-          this.checkSpecificPageAccess(
-            userId,
-            eventRequirementDto.specificPageAccess,
-          ),
+        condition: specificPageAccess,
+        check: () => this.checkSpecificPageAccess(userId, specificPageAccess),
         message: '특정 페이지 방문 요구사항을 만족하지 않습니다',
       },
     ]

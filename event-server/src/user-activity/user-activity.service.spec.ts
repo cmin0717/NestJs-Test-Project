@@ -5,6 +5,7 @@ import { DailyMonsterKill } from './schema/daily-monster-kill.schema'
 import { AccessGameInformation } from './schema/access-game-information.schema'
 import { PurchaseHistory } from './schema/purchase-history.schema'
 import { PageVisit } from './schema/page-visit.schema'
+import { Event } from '../event/schema/event.schema'
 
 describe('이벤트 검증 로직 테스트', () => {
   let service: UserActivityService
@@ -62,8 +63,10 @@ describe('이벤트 검증 로직 테스트', () => {
 
   describe('검증 로직 테스트[Access Game Information]', () => {
     const mockUserId = 'mockUserId'
-    const mockStartDate = new Date('2025-05-01')
-    const mockEndDate = new Date('2025-05-30')
+    const mockEvent = {
+      startDate: new Date('2025-05-01'),
+      endDate: new Date('2025-05-30'),
+    } as Event
 
     describe('단일 출석일 검증', () => {
       it('성공 케이스', async () => {
@@ -75,8 +78,7 @@ describe('이벤트 검증 로직 테스트', () => {
 
         const result = await service.checkRewardEligibility(
           mockUserId,
-          mockStartDate,
-          mockEndDate,
+          mockEvent,
           {
             specificAttendanceDates: ['2025-05-03'],
           },
@@ -92,14 +94,9 @@ describe('이벤트 검증 로직 테스트', () => {
         ])
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              specificAttendanceDates: ['2025-05-05'],
-            },
-          )
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            specificAttendanceDates: ['2025-05-05'],
+          })
         } catch (error) {
           expect(error.message).toBe('특정 출석일 요구사항을 만족하지 않습니다')
         }
@@ -122,8 +119,7 @@ describe('이벤트 검증 로직 테스트', () => {
 
         const result = await service.checkRewardEligibility(
           mockUserId,
-          mockStartDate,
-          mockEndDate,
+          mockEvent,
           {
             specificAttendanceDates: ['2025-05-03', '2025-05-04', '2025-05-05'],
           },
@@ -142,14 +138,9 @@ describe('이벤트 검증 로직 테스트', () => {
         ])
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              specificAttendanceDates: ['2025-05-03', '2025-05-04'],
-            },
-          )
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            specificAttendanceDates: ['2025-05-03', '2025-05-04'],
+          })
         } catch (error) {
           expect(error.message).toBe('특정 출석일 요구사항을 만족하지 않습니다')
         }
@@ -172,8 +163,7 @@ describe('이벤트 검증 로직 테스트', () => {
 
         const result = await service.checkRewardEligibility(
           mockUserId,
-          mockStartDate,
-          mockEndDate,
+          mockEvent,
           {
             accumulatedAttendanceDays: 3,
           },
@@ -192,14 +182,9 @@ describe('이벤트 검증 로직 테스트', () => {
         ])
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              accumulatedAttendanceDays: 3,
-            },
-          )
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            accumulatedAttendanceDays: 3,
+          })
         } catch (error) {
           expect(error.message).toBe('누적 출석일 요구사항을 만족하지 않습니다')
         }
@@ -225,14 +210,9 @@ describe('이벤트 검증 로직 테스트', () => {
         ])
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              accumulatedAttendanceDays: 3,
-            },
-          )
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            accumulatedAttendanceDays: 3,
+          })
         } catch (error) {
           expect(error.message).toBe('누적 출석일 요구사항을 만족하지 않습니다')
         }
@@ -258,8 +238,7 @@ describe('이벤트 검증 로직 테스트', () => {
 
         const result = await service.checkRewardEligibility(
           mockUserId,
-          mockStartDate,
-          mockEndDate,
+          mockEvent,
           {
             accumulatedPcRoomTime: 180,
           },
@@ -277,8 +256,7 @@ describe('이벤트 검증 로직 테스트', () => {
 
         const result = await service.checkRewardEligibility(
           mockUserId,
-          mockStartDate,
-          mockEndDate,
+          mockEvent,
           {
             accumulatedPcRoomTime: 180,
           },
@@ -299,14 +277,9 @@ describe('이벤트 검증 로직 테스트', () => {
         ])
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              accumulatedPcRoomTime: 120,
-            },
-          )
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            accumulatedPcRoomTime: 120,
+          })
         } catch (error) {
           expect(error.message).toBe(
             '누적 PC방 이용시간 요구사항을 만족하지 않습니다',
@@ -335,14 +308,9 @@ describe('이벤트 검증 로직 테스트', () => {
         ])
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              accumulatedPcRoomTime: 121,
-            },
-          )
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            accumulatedPcRoomTime: 121,
+          })
         } catch (error) {
           expect(error.message).toBe(
             '누적 PC방 이용시간 요구사항을 만족하지 않습니다',
@@ -360,8 +328,7 @@ describe('이벤트 검증 로직 테스트', () => {
 
         const result = await service.checkRewardEligibility(
           mockUserId,
-          mockStartDate,
-          mockEndDate,
+          mockEvent,
           {
             dailyPcRoomTime: {
               dailyPcRoomTime: 60,
@@ -379,17 +346,12 @@ describe('이벤트 검증 로직 테스트', () => {
         })
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              dailyPcRoomTime: {
-                dailyPcRoomTime: 60,
-                attendanceDate: '2025-05-03',
-              },
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            dailyPcRoomTime: {
+              dailyPcRoomTime: 60,
+              attendanceDate: '2025-05-03',
             },
-          )
+          })
         } catch (error) {
           expect(error.message).toBe(
             '당일 PC방 이용시간 요구사항을 만족하지 않습니다',
@@ -404,17 +366,12 @@ describe('이벤트 검증 로직 테스트', () => {
         })
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              dailyPcRoomTime: {
-                dailyPcRoomTime: 60,
-                attendanceDate: '2025-05-03',
-              },
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            dailyPcRoomTime: {
+              dailyPcRoomTime: 60,
+              attendanceDate: '2025-05-03',
             },
-          )
+          })
         } catch (error) {
           expect(error.message).toBe(
             '당일 PC방 이용시간 요구사항을 만족하지 않습니다',
@@ -426,17 +383,12 @@ describe('이벤트 검증 로직 테스트', () => {
         fakeAccessGameInformationModel.findOne.mockResolvedValueOnce(null)
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              dailyPcRoomTime: {
-                dailyPcRoomTime: 60,
-                attendanceDate: '2025-05-03',
-              },
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            dailyPcRoomTime: {
+              dailyPcRoomTime: 60,
+              attendanceDate: '2025-05-03',
             },
-          )
+          })
         } catch (error) {
           expect(error.message).toBe(
             '당일 PC방 이용시간 요구사항을 만족하지 않습니다',
@@ -448,8 +400,10 @@ describe('이벤트 검증 로직 테스트', () => {
 
   describe('검증 로직 테스트[Purchase History]', () => {
     const mockUserId = 'mockUserId'
-    const mockStartDate = new Date('2025-05-01')
-    const mockEndDate = new Date('2025-05-30')
+    const mockEvent = {
+      startDate: new Date('2025-05-01'),
+      endDate: new Date('2025-05-30'),
+    } as Event
 
     describe('누적 캐시 충전 검증', () => {
       it('성공 케이스', async () => {
@@ -470,8 +424,7 @@ describe('이벤트 검증 로직 테스트', () => {
 
         const result = await service.checkRewardEligibility(
           mockUserId,
-          mockStartDate,
-          mockEndDate,
+          mockEvent,
           {
             accumulatedPurchaseAmount: 30000,
           },
@@ -500,14 +453,9 @@ describe('이벤트 검증 로직 테스트', () => {
         ])
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              accumulatedPurchaseAmount: 30000,
-            },
-          )
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            accumulatedPurchaseAmount: 30000,
+          })
         } catch (error) {
           expect(error.message).toBe(
             '누적 캐시 충전 요구사항을 만족하지 않습니다',
@@ -532,14 +480,9 @@ describe('이벤트 검증 로직 테스트', () => {
         ])
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              accumulatedPurchaseAmount: 30000,
-            },
-          )
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            accumulatedPurchaseAmount: 30000,
+          })
         } catch (error) {
           expect(error.message).toBe(
             '누적 캐시 충전 요구사항을 만족하지 않습니다',
@@ -551,8 +494,10 @@ describe('이벤트 검증 로직 테스트', () => {
 
   describe('검증 로직 테스트[Page Visit]', () => {
     const mockUserId = 'mockUserId'
-    const mockStartDate = new Date('2025-05-01')
-    const mockEndDate = new Date('2025-05-30')
+    const mockEvent = {
+      startDate: new Date('2025-05-01'),
+      endDate: new Date('2025-05-30'),
+    } as Event
 
     describe('특정 페이지 방문 검증', () => {
       it('성공 케이스', async () => {
@@ -562,8 +507,7 @@ describe('이벤트 검증 로직 테스트', () => {
 
         const result = await service.checkRewardEligibility(
           mockUserId,
-          mockStartDate,
-          mockEndDate,
+          mockEvent,
           {
             specificPageAccess: 'https://www.nexon.com',
           },
@@ -577,14 +521,9 @@ describe('이벤트 검증 로직 테스트', () => {
         })
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              specificPageAccess: 'https://www.nexon.com',
-            },
-          )
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            specificPageAccess: 'https://www.nexon.com',
+          })
         } catch (error) {
           expect(error.message).toBe(
             '특정 페이지 방문 요구사항을 만족하지 않습니다',
@@ -596,14 +535,9 @@ describe('이벤트 검증 로직 테스트', () => {
         fakePageVisitModel.findOne.mockResolvedValueOnce(null)
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              specificPageAccess: 'https://www.nexon.com',
-            },
-          )
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            specificPageAccess: 'https://www.nexon.com',
+          })
         } catch (error) {
           expect(error.message).toBe(
             '특정 페이지 방문 요구사항을 만족하지 않습니다',
@@ -615,8 +549,10 @@ describe('이벤트 검증 로직 테스트', () => {
 
   describe('검증 로직 테스트[Daily Monster Kill]', () => {
     const mockUserId = 'mockUserId'
-    const mockStartDate = new Date('2025-05-01')
-    const mockEndDate = new Date('2025-05-30')
+    const mockEvent = {
+      startDate: new Date('2025-05-01'),
+      endDate: new Date('2025-05-30'),
+    } as Event
 
     describe('당일 몬스터 처치 검증', () => {
       it('성공 케이스', async () => {
@@ -627,8 +563,7 @@ describe('이벤트 검증 로직 테스트', () => {
 
         const result = await service.checkRewardEligibility(
           mockUserId,
-          mockStartDate,
-          mockEndDate,
+          mockEvent,
           {
             dailyMonsterKillCount: {
               dailyMonsterKillCount: 100,
@@ -646,17 +581,12 @@ describe('이벤트 검증 로직 테스트', () => {
         })
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              dailyMonsterKillCount: {
-                dailyMonsterKillCount: 100,
-                attendanceDate: '2025-05-03',
-              },
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            dailyMonsterKillCount: {
+              dailyMonsterKillCount: 100,
+              attendanceDate: '2025-05-03',
             },
-          )
+          })
         } catch (error) {
           expect(error.message).toBe(
             '당일 몬스터 처치 요구사항을 만족하지 않습니다',
@@ -668,17 +598,12 @@ describe('이벤트 검증 로직 테스트', () => {
         fakeDailyMonsterKillModel.findOne.mockResolvedValueOnce(null)
 
         try {
-          await service.checkRewardEligibility(
-            mockUserId,
-            mockStartDate,
-            mockEndDate,
-            {
-              dailyMonsterKillCount: {
-                dailyMonsterKillCount: 100,
-                attendanceDate: '2025-05-03',
-              },
+          await service.checkRewardEligibility(mockUserId, mockEvent, {
+            dailyMonsterKillCount: {
+              dailyMonsterKillCount: 100,
+              attendanceDate: '2025-05-03',
             },
-          )
+          })
         } catch (error) {
           expect(error.message).toBe(
             '당일 몬스터 처치 요구사항을 만족하지 않습니다',

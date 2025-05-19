@@ -1,4 +1,10 @@
-import { IsEmail, IsEnum, IsNumber, IsString } from 'class-validator'
+import {
+  IsEmail,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator'
 import { RoleEnum } from '../enum/user.enum'
 import { IsObjectId } from 'src/common/object-id-validator'
 
@@ -8,6 +14,10 @@ export class SignupDto {
 
   @IsString()
   password!: string
+
+  @IsEnum(RoleEnum)
+  @IsOptional()
+  role?: RoleEnum
 }
 
 export class RoleDto {
@@ -24,6 +34,9 @@ export class UserItemDto {
 
   @IsNumber()
   amount!: number
+
+  @IsObjectId()
+  eventDetailId!: string
 }
 
 export class UserCouponDto {
@@ -32,9 +45,15 @@ export class UserCouponDto {
 
   @IsNumber()
   amount!: number
+
+  @IsObjectId()
+  eventDetailId!: string
 }
 
 export class UserCashDto {
   @IsNumber()
   amount!: number
+
+  @IsObjectId()
+  eventDetailId!: string
 }

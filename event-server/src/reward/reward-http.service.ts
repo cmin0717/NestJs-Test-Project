@@ -34,21 +34,42 @@ export class RewardHttpService {
     }
   }
 
-  async requestUserCash(userId: string, amount: number) {
+  async requestUserCash(userId: string, eventDetailId: string, amount: number) {
     const url = `${this.AUTH_SERVER_URL}/user/cash/${userId}`
-    const response = await this.patch(url, { amount })
+    const response = await this.patch(url, { eventDetailId, amount })
     return response.data
   }
 
-  async requestUserItem(userId: string, name: string, amount: number) {
+  async requestUserItem(
+    userId: string,
+    eventDetailId: string,
+    name: string,
+    amount: number,
+  ) {
     const url = `${this.AUTH_SERVER_URL}/user/item/${userId}`
-    const response = await this.patch(url, { name, amount })
+    const response = await this.patch(url, { eventDetailId, name, amount })
     return response.data
   }
 
-  async requestUserCoupon(userId: string, name: string, amount: number) {
+  async requestUserCoupon(
+    userId: string,
+    eventDetailId: string,
+    name: string,
+    amount: number,
+  ) {
     const url = `${this.AUTH_SERVER_URL}/user/coupon/${userId}`
-    const response = await this.patch(url, { name, amount })
+    const response = await this.patch(url, { eventDetailId, name, amount })
+    return response.data
+  }
+
+  async getUserRequestSuccessHistory(userId: string, eventDetailId: string) {
+    const url = `${this.AUTH_SERVER_URL}/user/userRequestSuccessHistory`
+    const response = await this.httpService.axiosRef.get(url, {
+      params: { userId, eventDetailId },
+    })
+
+    console.log(response.data)
+
     return response.data
   }
 }
