@@ -409,15 +409,12 @@ describe('이벤트 검증 로직 테스트', () => {
       it('성공 케이스', async () => {
         fakePurchaseHistoryModel.find.mockResolvedValueOnce([
           {
-            dateString: '2025-05-01',
             amount: 10000,
           },
           {
-            dateString: '2025-05-04',
             amount: 10000,
           },
           {
-            dateString: '2025-05-30',
             amount: 10000,
           },
         ])
@@ -432,9 +429,9 @@ describe('이벤트 검증 로직 테스트', () => {
         expect(result).toBeUndefined()
         expect(fakePurchaseHistoryModel.find).toHaveBeenCalledWith({
           userId: mockUserId,
-          dateString: {
-            $gte: '2025-05-01',
-            $lte: '2025-05-30',
+          createdAt: {
+            $gte: mockEvent.startDate,
+            $lte: mockEvent.endDate,
           },
           isPaid: true,
         })
@@ -443,11 +440,9 @@ describe('이벤트 검증 로직 테스트', () => {
       it('실패 케이스[누적 캐시 충전 미달]', async () => {
         fakePurchaseHistoryModel.find.mockResolvedValueOnce([
           {
-            dateString: '2025-05-03',
             amount: 10000,
           },
           {
-            dateString: '2025-05-04',
             amount: 10000,
           },
         ])

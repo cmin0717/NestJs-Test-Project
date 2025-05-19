@@ -13,7 +13,7 @@ import {
   EventDetailUpdateDto,
   EventDto,
   EventUpdateDto,
-} from '../swagger/event.dto'
+} from '../swagger-dto/event.dto'
 import { JwtAuthGuard } from 'src/common/jwt.guard'
 import { Roles, RolesGuard } from 'src/common/role.guard'
 import { RoleEnum } from 'src/gateway/auth-server/auth-server.enum'

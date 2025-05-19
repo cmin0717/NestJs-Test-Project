@@ -131,12 +131,12 @@ export class UserActivityService {
 
   private async checkAccumulatedAttendanceDays(
     userId: string,
-    promotionStartDate: Date,
-    promotionEndDate: Date,
+    eventStartDate: Date,
+    eventEndDate: Date,
     accumulatedAttendanceDays: number,
   ) {
-    const stringStartDate = format(promotionStartDate, 'yyyy-MM-dd')
-    const stringEndDate = format(promotionEndDate, 'yyyy-MM-dd')
+    const stringStartDate = format(eventStartDate, 'yyyy-MM-dd')
+    const stringEndDate = format(eventEndDate, 'yyyy-MM-dd')
 
     const userAttendanceDates = await this.accessGameInformationModel.find({
       userId,
@@ -151,12 +151,12 @@ export class UserActivityService {
 
   private async checkAccumulatedPcRoomTime(
     userId: string,
-    promotionStartDate: Date,
-    promotionEndDate: Date,
+    eventStartDate: Date,
+    eventEndDate: Date,
     accumulatedPcRoomTime: number,
   ) {
-    const stringStartDate = format(promotionStartDate, 'yyyy-MM-dd')
-    const stringEndDate = format(promotionEndDate, 'yyyy-MM-dd')
+    const stringStartDate = format(eventStartDate, 'yyyy-MM-dd')
+    const stringEndDate = format(eventEndDate, 'yyyy-MM-dd')
 
     const loginInfos = await this.accessGameInformationModel.find({
       userId,
@@ -214,18 +214,15 @@ export class UserActivityService {
 
   private async checkAccumulatedPurchaseAmount(
     userId: string,
-    promotionStartDate: Date,
-    promotionEndDate: Date,
+    eventStartDate: Date,
+    eventEndDate: Date,
     accumulatedPurchaseAmount: number,
   ) {
-    const stringStartDate = format(promotionStartDate, 'yyyy-MM-dd')
-    const stringEndDate = format(promotionEndDate, 'yyyy-MM-dd')
-
     const purchaseHistories = await this.purchaseHistoryModel.find({
       userId,
-      dateString: {
-        $gte: stringStartDate,
-        $lte: stringEndDate,
+      createdAt: {
+        $gte: eventStartDate,
+        $lte: eventEndDate,
       },
       isPaid: true,
     })

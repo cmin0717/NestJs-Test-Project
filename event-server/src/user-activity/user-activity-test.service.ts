@@ -99,7 +99,7 @@ export class UserActivityTestService {
     }
 
     if (!pageVisit.visitedPages.includes(dto.visitedPageUrl)) {
-      return this.pageVisitModel.updateOne(
+      return this.pageVisitModel.findOneAndUpdate(
         { userId },
         { $push: { visitedPages: dto.visitedPageUrl } },
         { new: true },

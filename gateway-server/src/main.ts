@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
+  process.env.TZ = 'Asia/Seoul'
 
   const server = app.getHttpServer()
   server.keepAliveTimeout = 65000

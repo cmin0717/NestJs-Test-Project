@@ -73,7 +73,6 @@ export class CriticalSectionDecoratorRegister implements OnModuleInit {
                   lockParam = lockParam + parameter.getLockKey() + ':'
                 }
               })
-              console.log(lockParam)
 
               let result
               const lockIdentity =

@@ -1,7 +1,12 @@
 import { HttpService } from '@nestjs/axios'
-import { HttpException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { Request } from 'express'
 import { MakeEventDataSet, MakeRewardDataSet } from 'src/app.controller.dto'
+import {
+  axiosErrorHandler,
+  buildRequestConfig,
+  executeRequest,
+} from 'src/common/util'
 
 @Injectable()
 export class EventServerHttpService {
@@ -14,53 +19,22 @@ export class EventServerHttpService {
     const { method, originalUrl, body, user } = req
 
     const requestUrl = `${this.baseUrl}${originalUrl.replaceAll('/event-server', '')}`
-    const config = {
-      headers: {
-        'X-User-Data': user ? JSON.stringify(user) : undefined,
-      },
-    }
+    const config = buildRequestConfig(user)
 
     try {
-      switch (method) {
-        case 'GET':
-          return (await this.httpService.axiosRef.get(requestUrl, config)).data
-        case 'POST':
-          return (
-            await this.httpService.axiosRef.post(requestUrl, body, config)
-          ).data
-        case 'PUT':
-          return (await this.httpService.axiosRef.put(requestUrl, body, config))
-            .data
-        case 'PATCH':
-          return (
-            await this.httpService.axiosRef.patch(requestUrl, body, config)
-          ).data
-        case 'DELETE':
-          return (await this.httpService.axiosRef.delete(requestUrl, config))
-            .data
-        default:
-          throw new Error('Invalid method')
-      }
+      return await executeRequest(
+        method,
+        requestUrl,
+        body,
+        this.httpService.axiosRef,
+        config,
+      )
     } catch (error) {
-      if (error.isAxiosError) {
-        const axiosError = error
-
-        if (axiosError.response) {
-          const { status, data } = axiosError.response
-
-          throw new HttpException(data, status)
-        }
-
-        if (axiosError.request) {
-          throw new HttpException('외부 서버에서 응답이 없습니다', 504)
-        }
-      }
-
-      console.error('예상치 못한 에러:', error)
-      throw error
+      axiosErrorHandler(error)
     }
   }
 
+  // 테스트 데이터 생성을 위한 코드입니다. (무시하셔도 됩니다.)
   async makeDataSet() {
     const userId = '6829eefaf9215c45a216f29e'
 

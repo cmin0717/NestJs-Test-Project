@@ -16,7 +16,7 @@ import {
   RewardDto,
   RewardHistoryFilterDto,
   RewardUpdateDto,
-} from '../swagger/reward.dto'
+} from '../swagger-dto/reward.dto'
 
 @Controller({ path: 'event-server/reward' })
 @ApiTags('이벤트 서버 - Reward')

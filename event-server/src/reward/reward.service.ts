@@ -161,7 +161,7 @@ export class RewardService {
       rewardHistoryForm.state = RewardHistoryState.COMPLETED
       return await rewardHistoryForm.save()
     } catch (error) {
-      // 네트워크 문제로 보상 지급 성공인데 실패 처리되는 경우 처리
+      // 네트워크 문제 등으로 보상 지급 성공인데 실패 처리되는 경우 처리
       const userRequestSuccessHistory =
         await this.rewardHttpService.getUserRequestSuccessHistory(
           userId,

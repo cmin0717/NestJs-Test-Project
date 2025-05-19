@@ -1,8 +1,7 @@
-import { Type } from 'class-transformer'
+import { Transform, Type } from 'class-transformer'
 import {
   IsBoolean,
   IsDate,
-  IsDateString,
   IsNumber,
   IsObject,
   IsOptional,
@@ -11,6 +10,7 @@ import {
   ValidateNested,
 } from 'class-validator'
 import { IsObjectId } from '../../common/object-id-validator'
+import { subHours } from 'date-fns'
 
 export class EventDto {
   @IsString()
@@ -19,10 +19,20 @@ export class EventDto {
   @IsString()
   description!: string
 
-  @IsDateString()
+  @Transform(({ value }) => {
+    return value instanceof Date
+      ? subHours(value, 9)
+      : subHours(new Date(value), 9)
+  })
+  @IsDate()
   startDate!: Date
 
-  @IsDateString()
+  @Transform(({ value }) => {
+    return value instanceof Date
+      ? subHours(value, 9)
+      : subHours(new Date(value), 9)
+  })
+  @IsDate()
   endDate!: Date
 }
 

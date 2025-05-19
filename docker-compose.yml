@@ -7,6 +7,7 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
+      - TZ=Asia/Seoul
       - JWT_SECRET=maple_story_jwt_secret
       - AUTH_SERVER_URL=http://auth-server:3000
       - EVENT_SERVER_URL=http://event-server:3000
@@ -27,6 +28,7 @@ services:
       - "3001:3000"
     environment:
       - PORT=3000
+      - TZ=Asia/Seoul
       - JWT_SECRET=maple_story_jwt_secret
       - MONGODB_URI=mongodb://mongodb:27017/auth-server
     depends_on:
@@ -45,6 +47,7 @@ services:
       - "3002:3000"
     environment:
       - PORT=3000
+      - TZ=Asia/Seoul
       - AUTH_SERVER_URL=http://auth-server:3000
       - MONGODB_URI=mongodb://mongodb:27017/event-server
       - REDIS_URI=redis://redis:6379

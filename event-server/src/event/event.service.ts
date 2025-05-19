@@ -38,6 +38,7 @@ export class EventService {
     const event = await this.getEvent(eventId)
 
     const currentDate = new Date()
+
     if (
       !event.active ||
       event.startDate > currentDate ||
@@ -85,10 +86,6 @@ export class EventService {
   async createEvent(makerUserId: string, eventDto: EventDto): Promise<Event> {
     const { startDate, endDate } = eventDto
     const currentDate = new Date()
-
-    if (startDate <= currentDate) {
-      throw new BadRequestException('Start date must be in the future')
-    }
 
     if (endDate <= currentDate) {
       throw new BadRequestException('End date must be in the future')

@@ -68,8 +68,6 @@ export class RewardHttpService {
       params: { userId, eventDetailId },
     })
 
-    console.log(response.data)
-
     return response.data
   }
 }
