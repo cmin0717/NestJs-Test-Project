@@ -19,7 +19,7 @@ class EventRequirementDto {
   accumulatedAttendanceDays?: number
 
   @ApiProperty({
-    description: '누적 PC 방 시간',
+    description: '누적 PC 방 시간(단위 분)',
     required: false,
     type: Number,
     example: 600,
@@ -27,7 +27,7 @@ class EventRequirementDto {
   accumulatedPcRoomTime?: number
 
   @ApiProperty({
-    description: '일일 PC 방 시간',
+    description: '일일 PC 방 시간(단위 분)',
     required: false,
     type: Number,
     example: 180,
@@ -43,7 +43,7 @@ class EventRequirementDto {
   dailyMonsterKillCount?: number
 
   @ApiProperty({
-    description: '누적 구매 금액',
+    description: '누적 구매 금액(단위 원)',
     required: false,
     type: Number,
     example: 100000,

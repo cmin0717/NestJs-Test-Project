@@ -23,5 +23,6 @@ import { EventServerHttpService } from './event-server/event-server-http.service
     EventServerRewardController,
   ],
   providers: [JwtStrategy, AuthServerHttpService, EventServerHttpService],
+  exports: [AuthServerHttpService, EventServerHttpService],
 })
 export class GatewayModule {}

@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import mongoose from 'mongoose'
 
 @Schema({ timestamps: true, id: true })
-export class LoginInformation {
+export class AccessGameInformation {
   id!: string
 
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId })
@@ -29,5 +29,10 @@ export class LoginInformation {
   updatedAt!: Date
 }
 
-export const LoginInformationSchema =
-  SchemaFactory.createForClass(LoginInformation)
+export const AccessGameInformationSchema = SchemaFactory.createForClass(
+  AccessGameInformation,
+)
+AccessGameInformationSchema.index(
+  { userId: 1, dateString: 1 },
+  { unique: true },
+)

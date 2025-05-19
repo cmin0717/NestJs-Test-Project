@@ -5,28 +5,29 @@ import {
   DailyMonsterKillSchema,
 } from './schema/daily-monster-kill.schema'
 import {
-  LoginInformation,
-  LoginInformationSchema,
-} from './schema/login-information.schema'
+  AccessGameInformation,
+  AccessGameInformationSchema,
+} from './schema/access-game-information.schema'
 import { PageVisit, PageVisitSchema } from './schema/page-visit.schema'
 import {
   PurchaseHistory,
   PurchaseHistorySchema,
 } from './schema/purchase-history.schema'
-import { UserActivityController } from './user-activity.controller'
+import { UserActivityTestController } from './user-activity.controller'
 import { UserActivityService } from './user-activity.service'
+import { UserActivityTestService } from './user-activity-test.service'
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: DailyMonsterKill.name, schema: DailyMonsterKillSchema },
-      { name: LoginInformation.name, schema: LoginInformationSchema },
+      { name: AccessGameInformation.name, schema: AccessGameInformationSchema },
       { name: PurchaseHistory.name, schema: PurchaseHistorySchema },
       { name: PageVisit.name, schema: PageVisitSchema },
     ]),
   ],
-  controllers: [UserActivityController],
-  providers: [UserActivityService],
+  controllers: [UserActivityTestController],
+  providers: [UserActivityService, UserActivityTestService],
   exports: [UserActivityService],
 })
 export class UserActivityModule {}

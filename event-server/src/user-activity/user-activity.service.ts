@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { DailyMonsterKill } from './schema/daily-monster-kill.schema'
-import { LoginInformation } from './schema/login-information.schema'
+import { AccessGameInformation } from './schema/access-game-information.schema'
 import { PurchaseHistory } from './schema/purchase-history.schema'
 import { PageVisit } from './schema/page-visit.schema'
 import { format } from 'date-fns'
@@ -13,8 +13,8 @@ export class UserActivityService {
   constructor(
     @InjectModel(DailyMonsterKill.name)
     private dailyMonsterKillModel: Model<DailyMonsterKill>,
-    @InjectModel(LoginInformation.name)
-    private loginInformationModel: Model<LoginInformation>,
+    @InjectModel(AccessGameInformation.name)
+    private accessGameInformationModel: Model<AccessGameInformation>,
     @InjectModel(PurchaseHistory.name)
     private purchaseHistoryModel: Model<PurchaseHistory>,
     @InjectModel(PageVisit.name)
@@ -113,7 +113,7 @@ export class UserActivityService {
     userId: string,
     specificAttendanceDates: string[],
   ) {
-    const userAttendanceDates = await this.loginInformationModel.find({
+    const userAttendanceDates = await this.accessGameInformationModel.find({
       userId,
       dateString: {
         $in: specificAttendanceDates,
@@ -137,7 +137,7 @@ export class UserActivityService {
     const stringStartDate = format(promotionStartDate, 'yyyy-MM-dd')
     const stringEndDate = format(promotionEndDate, 'yyyy-MM-dd')
 
-    const userAttendanceDates = await this.loginInformationModel.find({
+    const userAttendanceDates = await this.accessGameInformationModel.find({
       userId,
       dateString: {
         $gte: stringStartDate,
@@ -157,7 +157,7 @@ export class UserActivityService {
     const stringStartDate = format(promotionStartDate, 'yyyy-MM-dd')
     const stringEndDate = format(promotionEndDate, 'yyyy-MM-dd')
 
-    const loginInfos = await this.loginInformationModel.find({
+    const loginInfos = await this.accessGameInformationModel.find({
       userId,
       dateString: {
         $gte: stringStartDate,
@@ -176,7 +176,7 @@ export class UserActivityService {
   private async checkDailyPcRoomTime(userId: string, dailyPcRoomTime: number) {
     const currentDate = new Date()
     const dateString = format(currentDate, 'yyyy-MM-dd')
-    const loginInfo = await this.loginInformationModel.findOne({
+    const loginInfo = await this.accessGameInformationModel.findOne({
       userId,
       dateString,
     })
@@ -221,6 +221,7 @@ export class UserActivityService {
         $gte: stringStartDate,
         $lte: stringEndDate,
       },
+      isPaid: true,
     })
 
     const totalPurchaseAmount = purchaseHistories.reduce(
@@ -230,18 +231,6 @@ export class UserActivityService {
 
     return totalPurchaseAmount >= accumulatedPurchaseAmount
   }
-
-  // async checkAccumulatedMonsterKillCount(
-  //   userId: string,
-  //   accumulatedMonsterKillCount: number,
-  // ) {
-  //   const currentDate = new Date()
-  //   const dateString = format(currentDate, 'yyyy-MM-dd')
-
-  //   const dailyMonsterKills = await this.dailyMonsterKillModel.find({
-  //     userId,
-  //     dateString
-  // }
 
   private async checkSpecificPageAccess(
     userId: string,

@@ -25,3 +25,4 @@ export class DailyMonsterKill {
 
 export const DailyMonsterKillSchema =
   SchemaFactory.createForClass(DailyMonsterKill)
+DailyMonsterKillSchema.index({ userId: 1, dateString: 1 }, { unique: true })

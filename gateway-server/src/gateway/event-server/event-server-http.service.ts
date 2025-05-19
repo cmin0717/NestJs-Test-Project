@@ -18,7 +18,6 @@ export class EventServerHttpService {
         'X-User-Data': user ? JSON.stringify(user) : undefined,
       },
     }
-    console.log(requestUrl)
 
     try {
       switch (method) {
