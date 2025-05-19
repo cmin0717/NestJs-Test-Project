@@ -169,9 +169,7 @@ export class EventService {
     number: number,
   ): Promise<void> {
     const query = { _id: eventDetailId }
-    if (number < 0) {
-      query['availableRewardCount'] = { $gte: Math.abs(number) }
-    }
+    if (number < 0) query['availableRewardCount'] = { $gte: Math.abs(number) }
 
     const updatedEventDetail = await this.eventDetailModel.findOneAndUpdate(
       query,
